@@ -11,14 +11,14 @@ from .recursive_ast_visitor import RecursiveAstVisitor
 _LOG = logging.getLogger(__name__)
 
 
-AstPathNode = t.NamedTuple(
-    'AstPathNode', node=typed_ast.ast3.AST, field=t.Optional[str], index=t.Optional[int])
+AstPathNode = t.NamedTuple('AstPathNode', [
+    ('node', typed_ast.ast3.AST), ('field', t.Optional[str]), ('index', t.Optional[int])])
 """Node on a AST path.
 
 Meaning of fields:
-- typed_ast.ast3.AST denotes an AST node on the path
-- str after that denotes the name of the field in that node
-- int after str denotes index if value of the field is a list
+- node is an AST node on the path
+- field is name of the field in that node; None if node is the final (i.e. target) node of the path
+- index is index of the next node in the field if value of the field is a list, None otherwise
 """
 
 

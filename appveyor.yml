@@ -2,7 +2,6 @@ version: "{build}"
 
 environment:
   matrix:
-    # for all available versions see https://www.appveyor.com/docs/build-environment/#python
     - PYTHON: "C:\\Python33"
     - PYTHON: "C:\\Python33-x64"
     - PYTHON: "C:\\Python34"
@@ -11,9 +10,11 @@ environment:
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python36-x64"
-    allow_failures:
-      - PYTHON: "C:\\Python33-x64"
-      - PYTHON: "C:\\Python34-x64"
+
+matrix:
+  allow_failures:
+    - PYTHON: "C:\\Python33-x64"
+    - PYTHON: "C:\\Python34-x64"
 
 init:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
