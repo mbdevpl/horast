@@ -1,0 +1,4 @@
+include dev_requirements.txt
+include requirements.txt
+include setup_boilerplate.py
+include test_requirements.txt

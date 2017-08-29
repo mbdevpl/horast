@@ -1,0 +1,79 @@
+sudo: false
+language: generic
+matrix:
+  include:
+    - os: linux
+      language: python
+      python: "3.3"
+    - os: linux
+      language: python
+      python: "3.4"
+    - os: linux
+      language: python
+      python: "3.5"
+    - os: linux
+      language: python
+      python: "3.6"
+    - os: linux
+      language: python
+      python: "3.6-dev"
+    - os: linux
+      language: python
+      python: "3.7-dev"
+    - os: linux
+      language: python
+      python: "pypy3.3-5.5-alpha"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.3.6"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.4.6"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.5.3"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.6.1"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.6-dev"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.7-dev"
+  allow_failures:
+    - python: "3.6-dev"
+    - python: "3.7-dev"
+    - env: TRAVIS_PYTHON_VERSION="3.6-dev"
+    - env: TRAVIS_PYTHON_VERSION="3.7-dev"
+
+before_install: |
+  set -e
+  if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+    brew update
+    brew install pyenv || brew upgrade pyenv
+    pyenv install "${TRAVIS_PYTHON_VERSION}"
+    export PATH="$HOME/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
+  fi
+  set +e
+
+install:
+  - pip install -U pip
+  - pip install -r dev_requirements.txt
+  - python setup.py bdist
+  - python setup.py bdist_wheel
+  - python setup.py sdist --formats=gztar,zip
+  - pip install .
+
+script:
+  - python -m coverage run --branch --source . -m unittest discover --verbose
+
+after_success:
+  - python -m coverage report --show-missing
+  - coveralls
+  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
+
+notifications:
+  slack:
+    secure: "HSOp/kYoVtqocxRr//A3jSPvzwg+8kVk6zkoO/HSC9OKNw1aLPsO9Jtc0n7PPdKYDQGag1Yddu0E54+p3OvV35GQ8bpCJItUlRthjnSjpxvGOqD4qGpXJl8fEEEi9OqKS+iwuKlrJPrkUfefWbdvGJA+iBxJiWF9MqgcowjaPF6Wp28M3MICZYUNFw2959/Eyk3EhZZM/MDbDuOKcJqSCgcM025QBYhSW2GBIJjO1H34nTk2T59Y3k9wkJFcjETYmhNKVwVR9e/WhS2COVK/0UAdAodPgiZ1NwlKifGVGbY4hPqexWxZKLnIYNfPjfoIBz3NSQ9FOYhUwpezZDdx+7JMxROpINULE6VTHOyy4LdAOczNYoLPSNuqecYc3UDt9FANtmZUUEOKx9x9Jf3leZzCQBQMbmX2SHL19ug+MrGqiyhUucjrRKH8ZPB9QPKYmG7MCFCvINkAOPiFX9KvT0wzCV4kNePdd0e3x8/GHegEib6cgYzlmtgP0S8nWRX7cJEh+ZBOCB4//r57tOmAeodmMrbpzGBtWchmmXwlMcWw7yCyX2lDTVfeIYXrsIbMvk4MNPnpO3YR54EsWP12x1PrYAEvtaW/q1CtTWKvIOGKAW7zm968zA1yyEV96eQSva2aNtwaoN59VQu35vcodfFUTtoHR1M5XXxfYKglJnk="
+  email: false

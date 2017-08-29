@@ -1,0 +1,14 @@
+# Eclipse
+/.settings
+/.*project
+# Python
+/build
+/dist
+/.cache
+__pycache__
+*.egg
+*.egg-info
+*.pyc
+# Python coverage
+/htmlcov
+/.coverage
