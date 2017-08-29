@@ -42,9 +42,11 @@ matrix:
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7-dev"
   allow_failures:
+      python: "3.3"
     - python: "3.6-dev"
     - python: "3.7-dev"
     - python: "pypy3.3-5.5-alpha"
+      env: TRAVIS_PYTHON_VERSION="3.3.6"
     - env: TRAVIS_PYTHON_VERSION="3.6-dev"
     - env: TRAVIS_PYTHON_VERSION="3.7-dev"
 

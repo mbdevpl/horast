@@ -13,6 +13,7 @@ environment:
 
 matrix:
   allow_failures:
+    - PYTHON: "C:\\Python33"
     - PYTHON: "C:\\Python33-x64"
     - PYTHON: "C:\\Python34-x64"
 
