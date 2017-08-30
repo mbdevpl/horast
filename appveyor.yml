@@ -18,7 +18,7 @@ matrix:
     - PYTHON: "C:\\Python34-x64"
 
 init:
-  - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
 
 install:
   - pip install -U pip
@@ -35,4 +35,3 @@ test_script:
 
 after_test:
   - python -m coverage report --show-missing
-  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
