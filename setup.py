@@ -5,6 +5,36 @@ import setuptools
 import setup_boilerplate
 
 
+class Package(setup_boilerplate.Package):
+
+    """Package metadata."""
+
+    name = 'horast'
+    description = 'human-oriented ast parser/unparser'
+    download_url = 'https://github.com/mbdevpl/horast'
+    classifiers = [
+        'Development Status :: 1 - Planning',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: Apache Software License',
+        'Natural Language :: English',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Topic :: Education',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Software Development :: Code Generators',
+        'Topic :: Software Development :: Compilers',
+        'Topic :: Software Development :: Pre-processors',
+        'Topic :: Utilities'
+        ]
+    keywords = ['ast', 'parsing', 'unparsing', 'comments']
+
+
 def setup() -> None:
     """Run setuptools.setup() with correct arguments.
 
@@ -60,6 +90,7 @@ def setup() -> None:
         include_package_data=True,
         package_data=package_data, exclude_package_data=exclude_package_data,
         install_requires=setup_boilerplate.parse_requirements(), extras_require=extras_require,
+        python_requires=setup_boilerplate.find_required_python_version(classifiers),
         entry_points=entry_points, test_suite=test_suite
         )
 
