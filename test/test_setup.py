@@ -5,7 +5,6 @@ import itertools
 import os
 import pathlib
 import runpy
-import shutil
 import subprocess
 import sys
 import typing as t
@@ -15,14 +14,12 @@ __updated__ = '2017-08-31'
 
 
 def run_program(*args, glob: bool = False):
+    """Run subprocess with given args. Use path globbing for each arg that contains an asterisk."""
     if glob:
-        # print(args)
         cwd = pathlib.Path.cwd()
         args = tuple(itertools.chain.from_iterable(
             list(str(_.relative_to(cwd)) for _ in cwd.glob(arg)) if '*' in arg else [arg]
             for arg in args))
-    # in Python 3.5 use subprocess.run()
-    # print(args, glob)
     process = subprocess.Popen(args)
     process.wait()
     return process
@@ -31,7 +28,6 @@ def run_program(*args, glob: bool = False):
 def run_pip(*args, **kwargs):
     python_exec_name = pathlib.Path(sys.executable).name
     pip_exec_name = python_exec_name.replace('python', 'pip')
-    # print(pip_exec_name, args, kwargs.items())
     run_program(pip_exec_name, *args, **kwargs)
 
 
@@ -126,10 +122,11 @@ class Tests(unittest.TestCase):
     """Test """
 
     def get_package_name(self):
+        """Attempt to guess the built package name."""
         cwd = pathlib.Path.cwd()
         directories = [
             path for path in cwd.iterdir() if pathlib.Path(cwd, path).is_dir() \
-                and pathlib.Path(cwd, path, '__init__.py').is_file()
+                and pathlib.Path(cwd, path, '__init__.py').is_file() \
                 and path.name != 'test']
         self.assertEqual(len(directories), 1, directories)
         return directories[0].name
@@ -186,8 +183,8 @@ class Tests(unittest.TestCase):
     def test_clean(self):
         run_module('setup', 'bdist')
         self.assertTrue(os.path.isdir('build'))
-        clean = import_module_member('setup_boilerplate', 'clean')
-        clean()
+        package = import_module_member('setup_boilerplate', 'Package')
+        package.clean()
         self.assertFalse(os.path.isdir('build'))
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
@@ -208,7 +205,7 @@ class Tests(unittest.TestCase):
         name = self.get_package_name()
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.get_package_name())
-        run_pip('install',  'dist/{}-{}.zip'.format(name, version))
+        run_pip('install', 'dist/{}-{}.zip'.format(name, version))
         run_pip('uninstall', '-y', self.get_package_name())
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')

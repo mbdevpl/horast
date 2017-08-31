@@ -1,13 +1,30 @@
 """Below code is generic boilerplate and normally should not be changed.
 
 To avoid setup script boilerplate, create "setup.py" file with the following minimal contents
-and modify them according to the specifics of your package:
+and modify them according to the specifics of your package.
 
-'''
+See the implementation of setup_boilerplate.Package for default metadata values and available
+options.
+"""
+
+import importlib
+import pathlib
+import shutil
+import sys
+import typing as t
+
+import setuptools
+
+__updated__ = '2017-08-31'
+
+SETUP_TEMPLATE = '''"""Setup script."""
+
 import setup_boilerplate
 
 
 class Package(setup_boilerplate.Package):
+
+    """Package metadata."""
 
     name = ''
     description = ''
@@ -25,20 +42,6 @@ class Package(setup_boilerplate.Package):
 if __name__ == '__main__':
     Package.setup()
 '''
-
-See the implementation of setup_boilerplate.Package for default metadata values and available
-options.
-"""
-
-import importlib
-import pathlib
-import shutil
-import sys
-import typing as t
-
-import setuptools
-
-__updated__ = '2017-08-31'
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -192,20 +195,3 @@ class Package:
             python_requires=find_required_python_version(cls.classifiers),
             entry_points=cls.entry_points, test_suite=cls.test_suite
             )
-
-
-def setup():
-    """Implement this when using this boilerplate."""
-    raise NotImplementedError()
-
-
-def clean(build_directory_name: str = 'build') -> None:
-    """Recursively delete build directory (by default "build") if it exists."""
-    build_directory_path = pathlib.Path(HERE, build_directory_name)
-    if build_directory_path.is_dir():
-        shutil.rmtree(str(build_directory_path))
-
-
-def main() -> None:
-    """Call this when using this boilerplate."""
-    setup()
