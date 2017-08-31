@@ -63,10 +63,6 @@ before_install: |
 install:
   - pip install -U pip
   - pip install -r dev_requirements.txt
-  - python setup.py bdist
-  - python setup.py bdist_wheel
-  - python setup.py sdist --formats=gztar,zip
-  - pip install .
 
 script:
   - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose
