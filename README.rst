@@ -32,7 +32,7 @@ horast
 Attempt at a human-oriented abstract syntax tree (AST) parser/unparser for Python 3.
 
 This package provides new AST node types which inherit from nodes in typed_ast.ast3 module.
-Additionally, it provided implementation of parser and unparser for the extended ASTs.
+Additionally, it provides implementation of parser and unparser for the extended ASTs.
 
 Simple example of how to use this package:
 

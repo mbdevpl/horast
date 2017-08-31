@@ -6,6 +6,7 @@ from .ast_comments import get_comment_tokens, insert_comment_tokens
 
 
 def parse(code: str, *args, **kwargs) -> typed_ast.ast3.AST:
+    """Parse given code into AST based on typed_ast.ast3 with nodes as defined in horast.nodes."""
     assert isinstance(code, str), type(code)
     try:
         tree = typed_ast.ast3.parse(code, *args, **kwargs)

@@ -6,7 +6,7 @@ import typed_ast.ast3
 
 from horast.ast_tools import ast_to_list
 from horast.ast_comments import get_comment_tokens, insert_comment_tokens
-from test.examples import EXAMPLES
+from .examples import EXAMPLES
 
 
 class Tests(unittest.TestCase):

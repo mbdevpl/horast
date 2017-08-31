@@ -5,7 +5,7 @@ import unittest
 import typed_ast.ast3
 
 from horast.recursive_ast_visitor import RecursiveAstVisitor
-from test.examples import EXAMPLES
+from .examples import EXAMPLES
 
 
 class Tests(unittest.TestCase):

@@ -8,7 +8,7 @@ import typed_astunparse
 from horast.ast_tools import ast_to_list
 from horast.parser import parse
 from horast.unparser import unparse
-from test.examples import EXAMPLES
+from .examples import EXAMPLES
 
 
 class Tests(unittest.TestCase):

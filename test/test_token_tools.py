@@ -4,7 +4,7 @@ import tokenize
 import unittest
 
 from horast.token_tools import get_tokens
-from test.examples import EXAMPLES
+from .examples import EXAMPLES
 
 
 class Tests(unittest.TestCase):

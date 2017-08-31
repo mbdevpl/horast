@@ -132,6 +132,7 @@ class Unparser(typed_astunparse.Unparser):
 
 
 def unparse(tree: typed_ast.ast3.AST, *args, **kwargs) -> str:
+    """Unparse AST based on typed_ast.ast3 with nodes as defined in horast.nodes into code."""
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     stream = io.StringIO()
     Unparser(tree, *args, file=stream, **kwargs)
