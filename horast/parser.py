@@ -2,7 +2,8 @@
 
 import typed_ast.ast3
 
-from .ast_comments import get_comment_tokens, insert_comment_tokens
+from .token_tools import get_comment_tokens
+from .ast_comments import insert_comment_tokens
 
 
 def parse(code: str, *args, **kwargs) -> typed_ast.ast3.AST:

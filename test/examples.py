@@ -4,6 +4,7 @@ import typing as t
 
 
 def prepare_examples(templates: t.Mapping[str, str]) -> t.Dict[str, str]:
+    """Insert comments into given code examples according to several patterns."""
     zeroth_comment = 'zero'
     comments = ('one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten')
     examples = {}
@@ -27,7 +28,7 @@ def prepare_examples(templates: t.Mapping[str, str]) -> t.Dict[str, str]:
     return examples
 
 
-EMPTY_EXAMPLES = {
+TEMPLATES = {
     'empty': """""",
     '1 assignment': """a = 1""",
     '3 assignments': """a = 1
@@ -82,9 +83,9 @@ c = 3""",
         ):
     pass"""}
 
-EXAMPLES = prepare_examples(EMPTY_EXAMPLES)
+EXAMPLES = prepare_examples(TEMPLATES)
 
-EMPTY_FAILING_EXAMPLES = {
+FAILING_TEMPLATES = {
     'function definition with args': """def fun(
         a,
         b
@@ -115,4 +116,4 @@ EMPTY_FAILING_EXAMPLES = {
         ):
     pass"""}
 
-FAILING_EXAMPLES = prepare_examples(EMPTY_FAILING_EXAMPLES)
+FAILING_EXAMPLES = prepare_examples(FAILING_TEMPLATES)

@@ -15,6 +15,20 @@ class Tests(unittest.TestCase):
 
     maxDiff = None
 
+    def test_parse(self):
+        for name, example in EXAMPLES.items():
+            with self.subTest(name=name, example=example):
+                tree = parse(example)
+                self.assertIsNotNone(tree)
+
+    def test_roundtrip_without_comments(self):
+        for name, example in EXAMPLES.items():
+            with self.subTest(name=name, example=example):
+                tree = typed_ast.ast3.parse(example)
+                code = unparse(tree)
+                reparsed_tree = typed_ast.ast3.parse(code)
+                self.assertEqual(typed_ast.ast3.dump(reparsed_tree), typed_ast.ast3.dump(tree))
+
     def test_roundtrip(self):
         only_localizable = False
         for name, example in EXAMPLES.items():
@@ -39,4 +53,6 @@ class Tests(unittest.TestCase):
                 self.assertEqual(
                     len(reparsed_complete_tree_nodes), len(complete_tree_nodes), complete_code)
                 self.assertEqual(
-                    typed_ast.ast3.dump(reparsed_complete_tree), typed_ast.ast3.dump(complete_tree))
+                    typed_ast.ast3.dump(reparsed_complete_tree),
+                    typed_ast.ast3.dump(complete_tree),
+                    '"""\n{}\n""" vs. original """\n{}\n"""'.format(complete_code, example))

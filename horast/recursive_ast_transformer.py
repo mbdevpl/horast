@@ -5,7 +5,6 @@ import typing as t
 
 import typed_ast.ast3
 
-
 _LOG = logging.getLogger(__name__)
 
 

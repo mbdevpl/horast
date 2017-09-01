@@ -7,9 +7,7 @@ import typed_ast.ast3
 
 from .recursive_ast_visitor import RecursiveAstVisitor
 
-
 _LOG = logging.getLogger(__name__)
-
 
 AstPathNode = t.NamedTuple('AstPathNode', [
     ('node', typed_ast.ast3.AST), ('field', t.Optional[str]), ('index', t.Optional[int])])
@@ -42,12 +40,10 @@ def get_ast_node_locations(nodes: t.List[typed_ast.ast3.AST]) -> t.List[t.Tuple[
 
 def node_path_in_ast(
         tree: typed_ast.ast3.AST,
-        target_node: typed_ast.ast3.AST) -> t.Optional[t.List[AstPathNode]]:
+        target_node: typed_ast.ast3.AST) -> t.List[AstPathNode]:
     """Find path to node in the given AST.
 
     Return a list of AstPathNode from root node up to the target node.
-
-    Return None if node is not in the tree.
     """
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(target_node, typed_ast.ast3.AST), type(target_node)
@@ -64,14 +60,11 @@ def node_path_in_ast(
             found.append(True)
     visitor = RecursiveAstVisitor(accumulate_nodes)
     visitor.visit(tree)
-    if not found:
-        return None
-    root_node = nodes[0]
     node_path = [AstPathNode(target_node, None, None)]
     current_anchor = target_node
     reversed_anchor_index = 0
     reversed_nodes = list(reversed(list(enumerate(nodes))))
-    while current_anchor is not root_node:
+    while current_anchor is not nodes[0]:
         reversed_anchor_index += 1
         for index, node in reversed_nodes[reversed_anchor_index:]:
             _LOG.debug('nodes[%i] is %s', index, node)

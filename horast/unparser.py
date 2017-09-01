@@ -10,7 +10,6 @@ import typed_astunparse
 
 from .nodes import Comment
 
-
 _LOG = logging.getLogger(__name__)
 
 

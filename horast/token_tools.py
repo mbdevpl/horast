@@ -14,5 +14,9 @@ def get_tokens(code: str) -> t.List[tokenize.TokenInfo]:
     return tokens
 
 
+def get_comment_tokens(code: str) -> t.List[tokenize.TokenInfo]:
+    return [token for token in get_tokens(code) if token.type is tokenize.COMMENT]
+
+
 def get_token_locations(tokens: t.List[tokenize.TokenInfo]) -> t.List[t.Tuple[int, int]]:
     return [token.start for token in tokens]

@@ -8,15 +8,10 @@ import typed_ast.ast3
 import typed_astunparse
 
 from .nodes import Comment
-from .token_tools import get_tokens, get_token_locations
+from .token_tools import get_token_locations
 from .ast_tools import ast_to_list, get_ast_node_locations, insert_in_tree
 
-
 _LOG = logging.getLogger(__name__)
-
-
-def get_comment_tokens(code: str) -> t.List[tokenize.TokenInfo]:
-    return [token for token in get_tokens(code) if token.type is tokenize.COMMENT]
 
 
 def insert_comment_tokens(
