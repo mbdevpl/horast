@@ -16,5 +16,5 @@ def parse(code: str, *args, **kwargs) -> typed_ast.ast3.AST:
             (', args=' + str(args)) if args else '', (', kwargs=' + str(kwargs)) if kwargs else '',
             code)) from err
     comment_tokens = get_comment_tokens(code)
-    tree = insert_comment_tokens(tree, comment_tokens)
+    tree = insert_comment_tokens(code, tree, comment_tokens)
     return tree

@@ -8,13 +8,32 @@ import typed_ast.ast3
 import typed_astunparse
 
 from .nodes import Comment
-from .token_tools import get_token_locations
-from .ast_tools import ast_to_list, get_ast_node_locations, insert_in_tree
+from .token_tools import get_token_locations, get_token_scopes
+from .ast_tools import \
+    ast_to_list, get_ast_node_locations, find_in_ast, insert_at_path_in_tree, insert_in_tree
 
 _LOG = logging.getLogger(__name__)
 
-
 def insert_comment_tokens(
+        code: str, tree: typed_ast.ast3.AST,
+        comment_tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+    assert isinstance(tree, typed_ast.ast3.AST)
+    assert isinstance(comment_tokens, list)
+    nodes = ast_to_list(tree)
+    if not nodes and comment_tokens:
+        _LOG.debug('overwriting empty AST with simplest editable tree')
+        tree = typed_ast.ast3.Module(body=[], type_ignores=[], lineno=1, col_offset=0)
+        nodes = ast_to_list(tree)
+    scopes = get_token_scopes(comment_tokens)
+    for comment_token, scope in zip(comment_tokens, scopes):
+        comment = Comment.from_token(comment_token, eol=False)
+        path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
+        _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after',
+                   path_to_anchor[-1])
+        tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)
+    return tree
+
+def insert_comment_tokens_approx(
         tree: typed_ast.ast3.AST, tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(tokens, list)
@@ -38,14 +57,14 @@ def insert_comment_tokens(
             node_index = len(node_locations)
             node_location = None
         while node_location is not None:
-            token_line, token_col = token_location
-            node_line, node_col = node_location
+            token_line, _ = token_location
+            node_line, _ = node_location
             if node_line > token_line:
                 break
             if node_line == token_line:
                 eol_comment_here = True
                 if node_index < len(node_locations) - 1:
-                    next_node_line, next_node_col = node_locations[node_index + 1]
+                    next_node_line, _ = node_locations[node_index + 1]
                     if next_node_line == token_line:
                         eol_comment_here = False
                 #if eol_comment_here:

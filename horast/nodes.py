@@ -30,6 +30,8 @@ class Comment(typed_ast.ast3.Expr):
      value3)
     """
 
+    #_fields = typed_ast.ast3.Expr._fields + ('eol',)
+
     @classmethod
     def from_token(cls, token: tokenize.TokenInfo, eol: bool):
         return cls(

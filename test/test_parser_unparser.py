@@ -17,6 +17,8 @@ class Tests(unittest.TestCase):
 
     def test_parse(self):
         for name, example in EXAMPLES.items():
+            if ' with eol comments' in name or name.startswith('multiline '):
+                continue
             with self.subTest(name=name, example=example):
                 tree = parse(example)
                 self.assertIsNotNone(tree)
@@ -32,6 +34,8 @@ class Tests(unittest.TestCase):
     def test_roundtrip(self):
         only_localizable = False
         for name, example in EXAMPLES.items():
+            if ' with eol comments' in name or name.startswith('multiline '):
+                continue
             with self.subTest(name=name, example=example):
                 tree = typed_ast.ast3.parse(example)
                 code = typed_astunparse.unparse(tree)

@@ -4,6 +4,8 @@ import io
 import tokenize
 import typing as t
 
+Scope = t.NamedTuple('Scope', [('start', t.Tuple[int, int]), ('end', t.Tuple[int, int])])
+
 
 def get_tokens(code: str) -> t.List[tokenize.TokenInfo]:
     assert isinstance(code, str), type(code)
@@ -20,3 +22,7 @@ def get_comment_tokens(code: str) -> t.List[tokenize.TokenInfo]:
 
 def get_token_locations(tokens: t.List[tokenize.TokenInfo]) -> t.List[t.Tuple[int, int]]:
     return [token.start for token in tokens]
+
+
+def get_token_scopes(tokens: t.List[tokenize.TokenInfo]) -> t.List[Scope]:
+    return [Scope(token.start, token.end) for token in tokens]

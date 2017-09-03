@@ -35,42 +35,42 @@ TEMPLATES = {
 b = 2
 c = 3""",
     'inline empty list': """[]""",
-    'empty list': """[
+    'multiline empty list': """[
     ]""",
     'inline 1-elem list': """[1]""",
     'inline 3-elem list': """[1, 2, 3]""",
-    '3-elem list': """[
+    'multiline 3-elem list': """[
     1,
     2,
     3
     ]""",
     'inline 1-elem set': """{1}""",
-    '1-elem set': """{
+    'multiline 1-elem set': """{
     1
     }""",
     'inline 3-elem set': """{1, 2, 3}""",
-    '3-elem set': """{
+    'multiline 3-elem set': """{
     1,
     2,
     3
     }""",
     'inline empty dict': """{}""",
-    'empty dict': """{
+    'multiline empty dict': """{
     }""",
     'inline dict': """{'a': 1, 'b': 2, 'c': 3}""",
-    'dict': """{
+    'multiline dict': """{
     'a': 1,
     'b': 2,
     'c': 3
     }""",
     'inline call': """call(1, 2, 3)""",
-    'call': """call(
+    'multiline call': """call(
     1,
     2,
     3
     )""",
     'inline call with kwargs': """call(1, 2, 3, a=1, b=2, c=3)""",
-    'call with kwargs': """call(
+    'multiline call with kwargs': """call(
     1,
     2,
     3,
@@ -79,26 +79,31 @@ c = 3""",
     c=3
     )""",
     'inline function definition': """def fun(): pass""",
-    'function definition': """def fun(
+    'function definition': """def fun():
+    pass""",
+    'multiline function definition': """def fun(
         ):
-    pass"""}
-
-EXAMPLES = prepare_examples(TEMPLATES)
-
-FAILING_TEMPLATES = {
-    'function definition with args': """def fun(
+    pass""",
+    'inline function definition with args': """def fun(a, b): pass""",
+    'function definition with args': """def fun(a, b):
+    pass""",
+    'multiline function definition with args': """def fun(
         a,
         b
         ):
     pass""",
-    'function definition with kwargs': """def fun(
+    'function definition with kwargs': """def fun(a, b, c=3, d=4):
+    pass""",
+    'multiline function definition with kwargs': """def fun(
         a,
         b,
         c=3,
         d=4
         ):
     pass""",
-    'function definition with star-args': """def fun(
+    'function definition with star-args': """def fun(a, b, c=3, d=4, *args):
+    pass""",
+    'multiline function definition with star-args': """def fun(
         a,
         b,
         c=3,
@@ -106,7 +111,11 @@ FAILING_TEMPLATES = {
         *args
         ):
     pass""",
-    'function definition with star-kargs': """def fun(
+    'inline function definition with star-kwargs': \
+        """def fun(a, b, *args, c=3, d=4, **kwargs): pass""",
+    'function definition with star-kwargs': """def fun(a, b, *args, c=3, d=4, **kwargs):
+    pass""",
+    'multiline function definition with star-kwargs': """def fun(
         a,
         b,
         *args,
@@ -116,4 +125,8 @@ FAILING_TEMPLATES = {
         ):
     pass"""}
 
-FAILING_EXAMPLES = prepare_examples(FAILING_TEMPLATES)
+EXAMPLES = prepare_examples(TEMPLATES)
+
+#FAILING_TEMPLATES = {}
+
+#FAILING_EXAMPLES = prepare_examples(FAILING_TEMPLATES)
