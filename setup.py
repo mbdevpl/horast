@@ -1,4 +1,4 @@
-"""Setup script of horast package."""
+"""Setup script for horast package."""
 
 import setup_boilerplate
 
@@ -17,6 +17,8 @@ class Package(setup_boilerplate.Package):
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',

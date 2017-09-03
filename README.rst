@@ -26,7 +26,7 @@ horast
     :alt: test coverage from Coveralls
 
 .. image:: https://img.shields.io/pypi/l/horast.svg
-    :target: https://travis-ci.org/mbdevpl/horast/blob/master/NOTICE
+    :target: https://github.com/mbdevpl/horast/blob/master/NOTICE
     :alt: license
 
 Attempt at a human-oriented abstract syntax tree (AST) parser/unparser for Python 3.

@@ -2,8 +2,6 @@ version: "{build}"
 
 environment:
   matrix:
-    - PYTHON: "C:\\Python33"
-    - PYTHON: "C:\\Python33-x64"
     - PYTHON: "C:\\Python34"
     - PYTHON: "C:\\Python34-x64"
     - PYTHON: "C:\\Python35"
@@ -13,8 +11,6 @@ environment:
 
 matrix:
   allow_failures:
-    - PYTHON: "C:\\Python33"
-    - PYTHON: "C:\\Python33-x64"
     - PYTHON: "C:\\Python34-x64"
 
 init:
@@ -22,7 +18,7 @@ init:
 
 install:
   - pip install -U pip
-  - pip install -r dev_requirements.txt
+  - pip install -U -r dev_requirements.txt
 
 build: off
 

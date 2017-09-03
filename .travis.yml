@@ -4,9 +4,6 @@ matrix:
   include:
     - os: linux
       language: python
-      python: "3.3"
-    - os: linux
-      language: python
       python: "3.4"
     - os: linux
       language: python
@@ -22,10 +19,7 @@ matrix:
       python: "3.7-dev"
     - os: linux
       language: python
-      python: "pypy3.3-5.5-alpha"
-    - os: osx
-      language: generic
-      env: TRAVIS_PYTHON_VERSION="3.3.6"
+      python: "pypy3.5-5.7.1-beta"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.4.6"
@@ -41,20 +35,23 @@ matrix:
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7-dev"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="pypy3.5-5.8.0-beta"
   allow_failures:
-    - python: "3.3"
     - python: "3.6-dev"
     - python: "3.7-dev"
-    - python: "pypy3.3-5.5-alpha"
-    - env: TRAVIS_PYTHON_VERSION="3.3.6"
+      python: "pypy3.5-5.7.1-beta"
     - env: TRAVIS_PYTHON_VERSION="3.6-dev"
     - env: TRAVIS_PYTHON_VERSION="3.7-dev"
+      env: TRAVIS_PYTHON_VERSION="pypy3.5-5.8.0-beta"
 
 before_install: |
   set -e
   if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
     brew update
     brew install pyenv || brew upgrade pyenv
+    pyenv install --list
     pyenv install "${TRAVIS_PYTHON_VERSION}"
     export PATH="$HOME/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
   fi
@@ -62,7 +59,7 @@ before_install: |
 
 install:
   - pip install -U pip
-  - pip install -r dev_requirements.txt
+  - pip install -U -r dev_requirements.txt
 
 script:
   - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose
