@@ -18,12 +18,12 @@ class RecursiveAstTransformer(typed_ast.ast3.NodeTransformer):
         self._node_transformer = transformer
         self._fields_first = fields_first
 
-    def visit_fields(self, node: typed_ast.ast3.AST) -> None:
-        """Visit all fields of a given node."""
-        _LOG.debug('visiting all fields of node %s', node)
+    def transform_fields(self, node: typed_ast.ast3.AST) -> None:
+        """Transform all fields of a given node."""
+        _LOG.debug('transforming all fields of node %s', node)
         assert hasattr(node, '_fields'), (type(node), node, type(node).__mro__)
         for field_name, field_value in typed_ast.ast3.iter_fields(node):
-            _LOG.debug('visiting field %s of %s', field_name, node)
+            _LOG.debug('transforming field %s of %s', field_name, node)
             if field_value is None \
                     or isinstance(field_value, (int, float, str, type, tuple)) \
                     or isinstance(type(field_value), t.TypingMeta):
@@ -36,8 +36,8 @@ class RecursiveAstTransformer(typed_ast.ast3.NodeTransformer):
 
     def generic_visit(self, node: typed_ast.ast3.AST) -> typed_ast.ast3.AST:
         if self._fields_first:
-            self.visit_fields(node)
+            self.transform_fields(node)
             return self._node_transformer(node)
         node = self._node_transformer(node)
-        self.visit_fields(node)
+        self.transform_fields(node)
         return node

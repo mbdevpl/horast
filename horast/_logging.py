@@ -1,4 +1,4 @@
-"""Default logging mechanism for music_metadata_sync module."""
+"""Default logging mechanism for horast module."""
 
 import logging
 import os
