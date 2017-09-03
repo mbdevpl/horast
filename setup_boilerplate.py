@@ -15,7 +15,7 @@ import typing as t
 
 import setuptools
 
-__updated__ = '2017-08-31'
+__updated__ = '2017-09-03'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -134,36 +134,39 @@ def find_required_python_version(
 
 class Package:
 
-    """"Default metadata and behaviour for a Python package setup script.
+    """Default metadata and behaviour for a Python package setup script."""
 
-    List of valid project classifiers: https://pypi.python.org/pypi?:action=list_classifiers
-
-    The extras_require is a dictionary which might have the following key-value pairs:
-    'some_feature': ['requirement1', 'requirement2'],
-
-    The entry_points is a dictionary which might have the following key-value pair:
-    'console_scripts': ['script_name = package.subpackage:function']
-    """
-
-    root_directory = '.'
+    root_directory = '.' # type: str
     """Root directory of the source code of the package, relative to the setup.py file location."""
 
     name = None # type: str
     description = None # type: str
-    url = 'https://mbdevpl.github.io/'
-    download_url = 'https://github.com/mbdevpl'
-    author = 'Mateusz Bysiek'
-    author_email = 'mb@mbdev.pl'
-    # maintainer = ''
-    # maintainer_email = ''
-    license_str = 'Apache License 2.0'
-    classifiers = []
-    keywords = []
+    url = 'https://mbdevpl.github.io/' # type: str
+    download_url = 'https://github.com/mbdevpl' # type: str
+    author = 'Mateusz Bysiek' # type: str
+    author_email = 'mb@mbdev.pl' # type: str
+    # maintainer = None # type: str
+    # maintainer_email = None # type: str
+    license_str = 'Apache License 2.0' # type: str
+
+    classifiers = [] # type: t.List[str]
+    """List of valid project classifiers: https://pypi.python.org/pypi?:action=list_classifiers"""
+
+    keywords = [] # type: t.List[str]
     package_data = {}
     exclude_package_data = {}
-    extras_require = {}
-    entry_points = {}
-    test_suite = 'test'
+
+    extras_require = {} # type: t.Mapping[str, t.List[str]]
+    """A dictionary containing entries of type 'some_feature': ['requirement1', 'requirement2']."""
+
+    entry_points = {} # type: t.Mapping[str, t.List[str]]
+    """A dictionary used to enable automatic creation of console scripts, gui scripts and plugins.
+
+    Example entry:
+    'console_scripts': ['script_name = package.subpackage:function']
+    """
+
+    test_suite = 'test' # type: str
 
     @classmethod
     def try_fields(cls, *names) -> t.Optional[t.Any]:

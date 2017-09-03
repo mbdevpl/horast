@@ -7,10 +7,11 @@ import pathlib
 import runpy
 import subprocess
 import sys
+import tempfile
 import typing as t
 import unittest
 
-__updated__ = '2017-08-31'
+__updated__ = '2017-09-03'
 
 
 def run_program(*args, glob: bool = False):
@@ -31,10 +32,10 @@ def run_pip(*args, **kwargs):
     run_program(pip_exec_name, *args, **kwargs)
 
 
-def run_module(name: str, *args) -> None:
+def run_module(name: str, *args, run_name: str = '__main__') -> None:
     backup_sys_argv = sys.argv
     sys.argv = [name + '.py'] + list(args)
-    runpy.run_module(name, run_name='__main__')
+    runpy.run_module(name, run_name=run_name)
     sys.argv = backup_sys_argv
 
 
@@ -155,6 +156,28 @@ class Tests(unittest.TestCase):
         for result in results:
             self.assertIsInstance(result, str)
 
+    def test_parse_requirements_empty(self):
+        parse_requirements = import_module_member('setup_boilerplate', 'parse_requirements')
+        reqs_file = tempfile.NamedTemporaryFile('w', delete=False)
+        reqs_file.close()
+        results = parse_requirements(reqs_file.name)
+        self.assertIsInstance(results, list)
+        self.assertEqual(len(results), 0)
+        os.remove(reqs_file.name)
+
+    def test_parse_requirements_comments(self):
+        parse_requirements = import_module_member('setup_boilerplate', 'parse_requirements')
+        reqs = ['# comment', 'numpy', '', '# another comment', 'scipy', '', '# one more comment']
+        reqs_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for req in reqs:
+            print(req, file=reqs_file)
+        reqs_file.close()
+        results = parse_requirements(reqs_file.name)
+        self.assertIsInstance(results, list)
+        self.assertGreater(len(results), 0)
+        self.assertLess(len(results), len(reqs))
+        os.remove(reqs_file.name)
+
     def test_find_required_python_ver(self):
         find_required_python_version = import_module_member(
             'setup_boilerplate', 'find_required_python_version')
@@ -163,6 +186,42 @@ class Tests(unittest.TestCase):
                 result = find_required_python_version(variant)
                 if result is not None:
                     self.assertIsInstance(result, str)
+
+    def test_find_required_py_ver_none(self):
+        find_required_python_version = import_module_member(
+            'setup_boilerplate', 'find_required_python_version')
+        result = find_required_python_version([])
+        self.assertIsNone(result)
+
+    def test_find_required_py_ver_many_only(self):
+        find_required_python_version = import_module_member(
+            'setup_boilerplate', 'find_required_python_version')
+        classifiers = [
+            'Programming Language :: Python :: 2 :: Only',
+            'Programming Language :: Python :: 3 :: Only']
+        with self.assertRaises(ValueError):
+            find_required_python_version(classifiers)
+
+    def test_find_required_py_ver_conflict(self):
+        find_required_python_version = import_module_member(
+            'setup_boilerplate', 'find_required_python_version')
+        classifier_variants = [
+            ['Programming Language :: Python :: 2.7',
+             'Programming Language :: Python :: 3 :: Only'],
+            ['Programming Language :: Python :: 2 :: Only',
+             'Programming Language :: Python :: 3.0']]
+        for classifiers in classifier_variants:
+            with self.assertRaises(ValueError):
+                find_required_python_version(classifiers)
+
+    def test_package(self):
+        package = import_module_member('setup_boilerplate', 'Package')
+        class Package(package):
+            name = 'package name'
+            description = 'package description'
+        self.assertIsNone(Package.try_fields())
+        self.assertEqual(Package.try_fields('name', 'description'), 'package name')
+        self.assertEqual(Package.try_fields('bad_field', 'description'), 'package description')
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_build_binary(self):
@@ -184,6 +243,9 @@ class Tests(unittest.TestCase):
         run_module('setup', 'bdist')
         self.assertTrue(os.path.isdir('build'))
         package = import_module_member('setup_boilerplate', 'Package')
+        package.clean()
+        os.mkdir('build')
+        package.clean()
         package.clean()
         self.assertFalse(os.path.isdir('build'))
 
@@ -212,3 +274,10 @@ class Tests(unittest.TestCase):
     def test_install_wheel(self):
         run_pip('install', 'dist/*.whl', glob=True)
         run_pip('uninstall', '-y', self.get_package_name())
+
+    def test_setup_do_nothing(self):
+        run_module('setup', 'wrong_setup_command', run_name='__not_main__')
+
+    def test_setup_error(self):
+        with self.assertRaises(SystemExit):
+            run_module('setup', 'wrong_setup_command')
