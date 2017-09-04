@@ -15,7 +15,7 @@ import typing as t
 
 import setuptools
 
-__updated__ = '2017-09-03'
+__updated__ = '2017-09-04'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -34,8 +34,7 @@ class Package(setup_boilerplate.Package):
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3 :: Only',
-        ]
+        'Programming Language :: Python :: 3 :: Only']
     keywords = []
 
 

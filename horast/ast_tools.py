@@ -182,12 +182,12 @@ def find_in_ast(
 
     if node_by_end_after_index is None:
         _LOG.debug('target %s is before first node', target_scope)
-        assert isinstance(nodes[0], typed_ast.ast3.Module), type(nodes[0])
+        assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), type(nodes[0])
         return ([AstPathNode(nodes[0], 'body', 0)], True)
 
     if node_by_start_before_index is None and not node_scopes_containing_target_scope:
         _LOG.debug('target %s is after last node', target_scope)
-        assert isinstance(nodes[0], typed_ast.ast3.Module), type(nodes[0])
+        assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), type(nodes[0])
         assert len(nodes[0].body) > 0
         return ([AstPathNode(nodes[0], 'body', len(nodes[0].body) - 1)], False)
     elif node_by_start_before_index is None or not node_scopes_containing_target_scope:
