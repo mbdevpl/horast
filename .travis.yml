@@ -17,9 +17,6 @@ matrix:
     - os: linux
       language: python
       python: "3.7-dev"
-    - os: linux
-      language: python
-      python: "pypy3.5-5.7.1-beta"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.4.6"
@@ -35,16 +32,11 @@ matrix:
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7-dev"
-    - os: osx
-      language: generic
-      env: TRAVIS_PYTHON_VERSION="pypy3.5-5.8.0"
   allow_failures:
     - python: "3.6-dev"
     - python: "3.7-dev"
-      python: "pypy3.5-5.7.1-beta"
     - env: TRAVIS_PYTHON_VERSION="3.6-dev"
     - env: TRAVIS_PYTHON_VERSION="3.7-dev"
-      env: TRAVIS_PYTHON_VERSION="pypy3.5-5.8.0"
 
 before_install: |
   set -e
