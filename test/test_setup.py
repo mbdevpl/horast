@@ -23,6 +23,8 @@ def run_program(*args, glob: bool = False):
             for arg in args))
     process = subprocess.Popen(args)
     process.wait()
+    if process.returncode != 0:
+        raise AssertionError('execution of {} returned {}'.format(args, process.returncode))
     return process
 
 
@@ -122,7 +124,7 @@ ALL_CLASSIFIERS_VARIANTS = [
 class Tests(unittest.TestCase):
     """Test """
 
-    def get_package_name(self):
+    def get_package_folder_name(self):
         """Attempt to guess the built package name."""
         cwd = pathlib.Path.cwd()
         directories = [
@@ -134,7 +136,7 @@ class Tests(unittest.TestCase):
 
     def test_find_version(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
-        result = find_version(self.get_package_name())
+        result = find_version(self.get_package_folder_name())
         self.assertIsInstance(result, str)
 
     def test_find_packages(self):
@@ -252,28 +254,35 @@ class Tests(unittest.TestCase):
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_install_code(self):
         run_pip('install', '.')
-        run_pip('uninstall', '-y', self.get_package_name())
+        run_pip('uninstall', '-y', self.get_package_folder_name())
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_install_source_tar(self):
-        name = self.get_package_name()
+        name = self.get_package_folder_name()
         find_version = import_module_member('setup_boilerplate', 'find_version')
-        version = find_version(self.get_package_name())
-        run_pip('install', 'dist/{}-{}.tar.gz'.format(name, version))
+        version = find_version(name)
+        run_pip('install', 'dist/*-{}.tar.gz'.format(version), glob=True)
         run_pip('uninstall', '-y', name)
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_install_source_zip(self):
-        name = self.get_package_name()
+        name = self.get_package_folder_name()
         find_version = import_module_member('setup_boilerplate', 'find_version')
-        version = find_version(self.get_package_name())
-        run_pip('install', 'dist/{}-{}.zip'.format(name, version))
-        run_pip('uninstall', '-y', self.get_package_name())
+        version = find_version(name)
+        run_pip('install', 'dist/*-{}.zip'.format(version), glob=True)
+        run_pip('uninstall', '-y', name)
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_install_wheel(self):
-        run_pip('install', 'dist/*.whl', glob=True)
-        run_pip('uninstall', '-y', self.get_package_name())
+        name = self.get_package_folder_name()
+        find_version = import_module_member('setup_boilerplate', 'find_version')
+        version = find_version(name)
+        run_pip('install', 'dist/*-{}-*.whl'.format(version), glob=True)
+        run_pip('uninstall', '-y', name)
+
+    def test_pip_error(self):
+        with self.assertRaises(AssertionError):
+            run_pip('wrong_pip_command')
 
     def test_setup_do_nothing(self):
         run_module('setup', 'wrong_setup_command', run_name='__not_main__')
