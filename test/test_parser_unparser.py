@@ -10,10 +10,39 @@ from horast.parser import parse
 from horast.unparser import unparse
 from .examples import EXAMPLES
 
+MODE_RESULTS = {
+    'exec': typed_ast.ast3.Module,
+    #'eval': typed_ast.ast3.expr,
+    'single': typed_ast.ast3.Interactive}
+
+TYPE_COMMENT_EXAMPLES = [
+    """a = 1""",
+    """a = 1 # type: int""",
+    """print('abc')""",
+    """print('abc')\n# printing abc"""]
 
 class Tests(unittest.TestCase):
 
     maxDiff = None
+
+    def test_parser_mode(self):
+        for mode, result in MODE_RESULTS.items():
+            with self.subTest(mode=mode):
+                tree = parse('print(1)\n# prints one', mode=mode)
+                self.assertIsInstance(tree, result)
+
+    def test_parse_type_comments(self):
+        for example in TYPE_COMMENT_EXAMPLES:
+            with self.subTest(nexample=example):
+                tree = parse(example)
+                self.assertIsNotNone(tree)
+                code = unparse(tree)
+                reparsed_tree = parse(code)
+                self.assertIsNotNone(reparsed_tree)
+                self.assertEqual(
+                    typed_ast.ast3.dump(reparsed_tree), typed_ast.ast3.dump(tree),
+                    '"""\n{}\n""" vs. original """\n{}\n"""'.format(code, example))
+                self.assertEqual(code.strip(), example)
 
     def test_parse(self):
         for name, example in EXAMPLES.items():
