@@ -46,6 +46,9 @@ Simple example of how to use this package:
 
 More examples in `<examples.ipynb>`_.
 
+technical details
+-----------------
+
 Parser is based on built-in tokenize module and typed_ast.ast3.parse() function.
 
 Unparser is essentially an extension of Unparser class from typed_astunparse package.
@@ -54,7 +57,7 @@ Nodes provided and handled by horast are listed below.
 
 
 Comment
--------
+~~~~~~~
 
 Full line as well as end-of-line comments are parsed/unparsed correctly when they are outside
 of multi-line expressions.
@@ -63,8 +66,16 @@ Currently, handling of comments within multi-line expressions is implemented onl
 
 
 Docstring
----------
+~~~~~~~~~
 
 To do.
 
 
+requirements
+------------
+
+CPython >= 3.4.
+
+Python libraries as specified in `<requirements.txt>`_.
+
+Building and running tests additionally requires packages listed in `<dev_requirements.txt>`_.
