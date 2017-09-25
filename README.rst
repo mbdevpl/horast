@@ -21,9 +21,9 @@ horast
     :target: https://www.codacy.com/app/mbdevpl/horast
     :alt: grade from Codacy
 
-.. image:: https://coveralls.io/repos/github/mbdevpl/horast/badge.svg?branch=master
-    :target: https://coveralls.io/github/mbdevpl/horast
-    :alt: test coverage from Coveralls
+.. image:: https://codecov.io/gh/mbdevpl/horast/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/mbdevpl/horast
+    :alt: test coverage from Codecov
 
 .. image:: https://img.shields.io/pypi/l/horast.svg
     :target: https://github.com/mbdevpl/horast/blob/master/NOTICE
