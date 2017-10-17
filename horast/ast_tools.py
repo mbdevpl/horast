@@ -143,7 +143,7 @@ def find_in_ast(
     - before is boolean flag set to True if target scope is before the anchor node, False otherwise
     """
     scopes = get_ast_node_scopes(code, nodes)
-    assert len(nodes) == len(scopes)
+    assert len(nodes) == len(scopes), (len(nodes), len(scopes))
     node_scopes_by_start = list(zip(nodes, scopes))
     node_scopes_by_start.sort(key=lambda _: _[1].end, reverse=True)
     node_scopes_by_start.sort(key=lambda _: _[1].start)

@@ -20,8 +20,8 @@ class Tests(unittest.TestCase):
                     tree = typed_ast.ast3.parse(example)
                     nodes = ast_to_list(tree, only_localizable)
                     self.assertIsInstance(nodes, list)
-                    if tree:
-                        self.assertGreaterEqual(len(nodes), 0)
+                    if not only_localizable:
+                        self.assertGreater(len(nodes), 0)
 
     def test_get_ast_node_locations(self):
         for name, example in EXAMPLES.items():
@@ -40,15 +40,12 @@ class Tests(unittest.TestCase):
             'def', 'def\n', 'def\nghi', '\ndef\nghi', 'abc\ndef\nghi',
             '', '\n', '\n\n']
         for text in texts:
-            previous_location = None
             for index in range(len(text) + 1):
                 with self.subTest(text=text, index=index):
                     location = convert_1d_str_index_to_2d(text, index)
                     lineno, col_offset = location
                     self.assertGreaterEqual(lineno, 1, location)
                     self.assertGreaterEqual(col_offset, 0, location)
-                    if previous_location is not None:
-                        self.assertGreater(location, previous_location)
                     lines = text.splitlines(keepends=True)
                     if not text or text.endswith('\n'):
                         lines += ['']
@@ -59,10 +56,10 @@ class Tests(unittest.TestCase):
                     if col_offset < len(line):
                         self.assertEqual(line[col_offset], text[index])
                     else:
-                        if lineno < len(lines):
-                            raise AssertionError(
-                                'location {} oveflows into the next line in line no.{} {}'
-                                .format(location, lineno, repr(line)))
+                        self.assertGreaterEqual(
+                            lineno, len(lines),
+                            'location {} oveflows into the next line in line no.{} {}'
+                            .format(location, lineno, repr(line)))
 
     def test_get_ast_node_scopes(self):
         for name, example in EXAMPLES.items():
@@ -86,8 +83,9 @@ class Tests(unittest.TestCase):
         for name, example in EXAMPLES.items():
             if ' with eol comments' in name or name.startswith('multiline '):
                 continue
-            for index in range(len(example) + 1):
-                for end_index in range(index + 1, len(example) + 1):
+            for index in range(0, len(example) + 1, 64):
+                for end_index in range(index + 1, len(example) + 1, 64):
+                    # TODO: decrease distance step without failing assertions
                     scope = Scope(convert_1d_str_index_to_2d(example, index),
                                   convert_1d_str_index_to_2d(example, end_index))
                     with self.subTest(name=name, example=example, scope=scope):
@@ -96,8 +94,6 @@ class Tests(unittest.TestCase):
                         path, before = find_in_ast(example, tree, nodes, scope)
                         self.assertIsInstance(path, list)
                         self.assertIsInstance(before, bool)
-                    break
-                break
 
     def test_find_in_ast_real(self):
         for name, example in EXAMPLES.items():

@@ -52,6 +52,10 @@ class Tests(unittest.TestCase):
                 tree = parse(example)
                 self.assertIsNotNone(tree)
 
+    def test_parse_failure(self):
+        with self.assertRaises(SyntaxError):
+            parse('def ill_pass(): pass', mode='eval')
+
     def test_roundtrip_without_comments(self):
         for name, example in EXAMPLES.items():
             with self.subTest(name=name, example=example):
@@ -65,22 +69,21 @@ class Tests(unittest.TestCase):
         for name, example in EXAMPLES.items():
             if ' with eol comments' in name or name.startswith('multiline '):
                 continue
-            with self.subTest(name=name, example=example):
+            data = {}
+            with self.subTest(name=name, example=example, data=data):
                 tree = typed_ast.ast3.parse(example)
                 code = typed_astunparse.unparse(tree)
                 complete_tree = parse(example)
+                data['complete_tree'] = complete_tree
                 complete_code = unparse(complete_tree)
+                data['complete_code'] = complete_code
                 self.assertGreaterEqual(len(complete_code), len(code), (complete_code, code))
                 reparsed_tree = typed_ast.ast3.parse(code)
                 tree_nodes = ast_to_list(tree, only_localizable)
                 reparsed_tree_nodes = ast_to_list(reparsed_tree, only_localizable)
                 self.assertEqual(len(reparsed_tree_nodes), len(tree_nodes))
                 self.assertEqual(typed_ast.ast3.dump(reparsed_tree), typed_ast.ast3.dump(tree))
-                try:
-                    reparsed_complete_tree = parse(complete_code)
-                except SyntaxError as err:
-                    raise AssertionError('invalid syntax after inserting comments:\n{}'.format(
-                        typed_ast.ast3.dump(complete_tree))) from err
+                reparsed_complete_tree = parse(complete_code)
                 complete_tree_nodes = ast_to_list(complete_tree, only_localizable)
                 reparsed_complete_tree_nodes = ast_to_list(reparsed_complete_tree, only_localizable)
                 self.assertEqual(

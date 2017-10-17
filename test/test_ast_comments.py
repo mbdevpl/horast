@@ -12,7 +12,7 @@ from .examples import EXAMPLES
 
 class Tests(unittest.TestCase):
 
-    def test_insert_comment_tokens(self):
+    def test_comment_tokens(self):
         only_localizable = False
         for name, example in EXAMPLES.items():
             if ' with eol comments' in name or name.startswith('multiline '):
@@ -28,7 +28,7 @@ class Tests(unittest.TestCase):
                     len(tree_nodes), max(1 if comments else 0, len(nodes)) + 2 * len(comments),
                     (tree_nodes, nodes, comments))
 
-    def test_insert_comment_tokens_approx(self):
+    def test_comment_tokens_approx(self):
         for name, example in EXAMPLES.items():
             for only_localizable in (False, True):
                 with self.subTest(name=name, example=example, only_localizable=only_localizable):

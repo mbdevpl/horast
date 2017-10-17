@@ -12,7 +12,7 @@ _LOG = logging.getLogger(__name__)
 
 class Tests(unittest.TestCase):
 
-    @unittest.skip('not ready')
+    @unittest.skip('eol field is temporarily disabled')
     def test_comment(self):
         expr_fields = typed_ast.ast3.Expr._fields
         comment_fields = Comment._fields

@@ -20,10 +20,6 @@ def insert_comment_tokens(
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(comment_tokens, list)
     nodes = ast_to_list(tree)
-    if not nodes and comment_tokens:
-        _LOG.debug('overwriting empty AST with simplest editable tree')
-        tree = typed_ast.ast3.Module(body=[], type_ignores=[], lineno=1, col_offset=0)
-        nodes = ast_to_list(tree)
     scopes = get_token_scopes(comment_tokens)
     for comment_token, scope in zip(comment_tokens, scopes):
         comment = Comment.from_token(comment_token, eol=False)
