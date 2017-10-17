@@ -6,10 +6,10 @@ import re
 import typing as t
 
 import asttokens
+from static_typing.ast_manipulation import RecursiveAstVisitor
 import typed_ast.ast3
 
 from .token_tools import Scope
-from .recursive_ast_visitor import RecursiveAstVisitor
 
 _LOG = logging.getLogger(__name__)
 
@@ -28,10 +28,11 @@ def ast_to_list(
         tree: typed_ast.ast3.AST, only_localizable: bool = False) -> t.List[typed_ast.ast3.AST]:
     """Generate a flat list of nodes in AST."""
     nodes = []
-    def accumulate_nodes(node):
-        if not only_localizable or hasattr(node, 'lineno') and hasattr(node, 'col_offset'):
-            nodes.append(node)
-    visitor = RecursiveAstVisitor(accumulate_nodes)
+    class Visitor(RecursiveAstVisitor[typed_ast.ast3]):
+        def visit_node(self, node):
+            if not only_localizable or hasattr(node, 'lineno') and hasattr(node, 'col_offset'):
+                nodes.append(node)
+    visitor = Visitor()
     visitor.visit(tree)
     return nodes
 
