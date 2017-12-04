@@ -127,7 +127,6 @@ class Unparser(typed_astunparse.Unparser):
         else:
             self.fill('#')
         self.write(node.value.s)
-        self.fill()
 
 
 def unparse(tree: typed_ast.ast3.AST, *args, **kwargs) -> str:
