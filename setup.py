@@ -11,7 +11,7 @@ class Package(setup_boilerplate.Package):
     description = 'human-oriented ast parser/unparser'
     download_url = 'https://github.com/mbdevpl/horast'
     classifiers = [
-        'Development Status :: 1 - Planning',
+        'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
