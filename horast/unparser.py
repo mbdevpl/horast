@@ -6,7 +6,7 @@ import logging
 
 from astunparse.unparser import interleave
 import typed_ast.ast3
-import typed_astunparse
+import static_typing.unparser
 
 from .nodes import Comment
 
@@ -31,7 +31,8 @@ def interleave_noncomment(inter, f, seq):
             prev = x
 
 
-class Unparser(typed_astunparse.Unparser):
+class Unparser(static_typing.unparser.Unparser):
+
     """Extension of typed_astunpare.Unparser that handles Comment nodes."""
 
     def _List(self, t):
