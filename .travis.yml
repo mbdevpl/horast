@@ -52,6 +52,21 @@ after_success:
   - codecov
   - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
 
+before_deploy:
+  - pip3 install -U --user version_query || pip3 install -U version_query
+  - wget https://gist.githubusercontent.com/mbdevpl/46d458350f0c9cc7d793b67573e01f7b/raw/prepare_bintray_deployment.py
+  - python3 prepare_bintray_deployment.py "$TRAVIS_OS_NAME-python$TRAVIS_PYTHON_VERSION" "dist/*.tar.gz" "dist/*.whl" "dist/*.zip"
+
+deploy:
+  - provider: bintray
+    file: ".bintray.json"
+    user: "mbdevpl"
+    key:
+      secure: "SNC89pvbeSgRTf/q66W4okjh5TQf95AtZu2B9lAEsR9EgRI5HrFrden2ewiVNeLuJqdX0rkgh7ioLwmJqr5Iw4qt5ExMGmOrwFB6EpOqmIHBzcOkmRcnWM4K8pnXYJpJ0uuiPy2OhmZp/gw5Ahm2ppGcT+BqsAn0SYMgeUG3IaCzj5LZ8gTxbes4ZfAfW75i5lMgIjImiHGhOq5Py/Vzfjea2nhJDZeGur/FEcVm4wMvlzbvktGegHh3dvPLXD0SFQDoPcxTF/4b5QEpOJDza4hPt0WloxARr1z/gO3AIBWPxxtMs5QrwMNMFHEZWjDd8aUDbw64xZFYTr8WVRu1Xcq1+P9RF+ES1PNYTeZ3OYBmtZfZp0nSya9Nc3Kdny4Psw+1VTXVVqjpfHEQeBA2eW/ZcdLB6rmk4+r2Vm75AMGThuovWbNbPxMn0ZQdtqiybgCe9fbWUk2PDvpQd64/TdB01VVE2XahK8rSASnoj9U/4iVxlgwYc6NnN46AUU1czty6slACwemkzI4RgZbOTVh0L4KUf6wX9E0yuNcexh+9KMw48AG6BwaiEIwEtZ4KPfF2Dzqu/8A4wjO4+MmBzLcMroIcMjo8+b/kXfmKyizz4tc8shzX84yIwzdqlcPTSVjH/7QnAxv1Wo/aBM9MJyP3I23vQ21PjdobUF4OHnk="
+    on:
+      all_branches: true
+    skip_cleanup: true
+
 notifications:
   slack:
     secure: "HSOp/kYoVtqocxRr//A3jSPvzwg+8kVk6zkoO/HSC9OKNw1aLPsO9Jtc0n7PPdKYDQGag1Yddu0E54+p3OvV35GQ8bpCJItUlRthjnSjpxvGOqD4qGpXJl8fEEEi9OqKS+iwuKlrJPrkUfefWbdvGJA+iBxJiWF9MqgcowjaPF6Wp28M3MICZYUNFw2959/Eyk3EhZZM/MDbDuOKcJqSCgcM025QBYhSW2GBIJjO1H34nTk2T59Y3k9wkJFcjETYmhNKVwVR9e/WhS2COVK/0UAdAodPgiZ1NwlKifGVGbY4hPqexWxZKLnIYNfPjfoIBz3NSQ9FOYhUwpezZDdx+7JMxROpINULE6VTHOyy4LdAOczNYoLPSNuqecYc3UDt9FANtmZUUEOKx9x9Jf3leZzCQBQMbmX2SHL19ug+MrGqiyhUucjrRKH8ZPB9QPKYmG7MCFCvINkAOPiFX9KvT0wzCV4kNePdd0e3x8/GHegEib6cgYzlmtgP0S8nWRX7cJEh+ZBOCB4//r57tOmAeodmMrbpzGBtWchmmXwlMcWw7yCyX2lDTVfeIYXrsIbMvk4MNPnpO3YR54EsWP12x1PrYAEvtaW/q1CtTWKvIOGKAW7zm968zA1yyEV96eQSva2aNtwaoN59VQu35vcodfFUTtoHR1M5XXxfYKglJnk="
