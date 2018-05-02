@@ -1,9 +1,13 @@
-# Eclipse
-/.settings
-/.*project
+# OS: macOS
+.DS_Store
+
+# OS: Windows
+desktop.ini
+
 # Jupyter Notebook
-/.ipynb_checkpoints
+.ipynb_checkpoints
 *-checkpoint.ipynb
+
 # Python
 /build
 /dist
@@ -12,6 +16,7 @@ __pycache__
 *.egg
 *.egg-info
 *.pyc
-# Python coverage
+
+# Python: coverage
 /htmlcov
 /.coverage

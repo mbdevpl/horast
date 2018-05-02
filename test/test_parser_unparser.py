@@ -12,7 +12,7 @@ from .examples import EXAMPLES
 
 MODE_RESULTS = {
     'exec': typed_ast.ast3.Module,
-    #'eval': typed_ast.ast3.expr,
+    # 'eval': typed_ast.ast3.expr,
     'single': typed_ast.ast3.Interactive}
 
 TYPE_COMMENT_EXAMPLES = [
@@ -20,6 +20,7 @@ TYPE_COMMENT_EXAMPLES = [
     """a = 1  # type: int""",
     """print('abc')""",
     """print('abc')\n# printing abc"""]
+
 
 class Tests(unittest.TestCase):
 

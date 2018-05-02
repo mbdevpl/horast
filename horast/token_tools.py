@@ -8,8 +8,9 @@ Scope = t.NamedTuple('Scope', [('start', t.Tuple[int, int]), ('end', t.Tuple[int
 
 
 def get_tokens(code: str) -> t.List[tokenize.TokenInfo]:
+    """List of all tokens contained in the given code."""
     assert isinstance(code, str), type(code)
-    code_bytes = code.encode() # type: bytes
+    code_bytes = code.encode()  # type: bytes
     with io.BytesIO(code_bytes) as code_bytes_reader:
         tokenizer = tokenize.tokenize(code_bytes_reader.readline)
         tokens = [token for token in tokenizer]

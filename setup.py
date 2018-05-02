@@ -19,7 +19,7 @@ class Package(setup_boilerplate.Package):
         'Natural Language :: English',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX',
+        'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -31,7 +31,7 @@ class Package(setup_boilerplate.Package):
         'Topic :: Software Development :: Compilers',
         'Topic :: Software Development :: Pre-processors',
         'Topic :: Utilities']
-    keywords = ['ast', 'parsing', 'unparsing', 'comments']
+    keywords = ['abstract syntax tree', 'ast', 'parsing', 'unparsing', 'comments']
 
 
 if __name__ == '__main__':

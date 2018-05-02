@@ -111,8 +111,8 @@ c = 3""",
         *args
         ):
     pass""",
-    'inline function definition with star-kwargs': \
-        """def fun(a, b, *args, c=3, d=4, **kwargs): pass""",
+    'inline function definition with star-kwargs':
+    """def fun(a, b, *args, c=3, d=4, **kwargs): pass""",
     'function definition with star-kwargs': """def fun(a, b, *args, c=3, d=4, **kwargs):
     pass""",
     'multiline function definition with star-kwargs': """def fun(
@@ -127,6 +127,6 @@ c = 3""",
 
 EXAMPLES = prepare_examples(TEMPLATES)
 
-#FAILING_TEMPLATES = {}
+# FAILING_TEMPLATES = {}
 
-#FAILING_EXAMPLES = prepare_examples(FAILING_TEMPLATES)
+# FAILING_EXAMPLES = prepare_examples(FAILING_TEMPLATES)

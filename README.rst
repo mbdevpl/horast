@@ -6,7 +6,7 @@ horast
 ======
 
 .. image:: https://img.shields.io/pypi/v/horast.svg
-    :target: https://pypi.python.org/pypi/horast
+    :target: https://pypi.org/project/horast
     :alt: package version from PyPI
 
 .. image:: https://travis-ci.org/mbdevpl/horast.svg?branch=master

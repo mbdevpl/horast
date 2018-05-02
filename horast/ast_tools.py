@@ -28,6 +28,7 @@ def ast_to_list(
         tree: typed_ast.ast3.AST, only_localizable: bool = False) -> t.List[typed_ast.ast3.AST]:
     """Generate a flat list of nodes in AST."""
     nodes = []
+
     class Visitor(RecursiveAstVisitor[typed_ast.ast3]):
         def visit_node(self, node):
             if not only_localizable or hasattr(node, 'lineno') and hasattr(node, 'col_offset'):
@@ -156,56 +157,58 @@ def find_in_ast(
     _LOG.debug('the target scope %s', target_scope)
 
     node_by_end_after_index = None
-    for i, (node, scope) in enumerate(node_scopes_by_end):
-        if target_scope.start > scope.end:
+    for i, (node, scope_) in enumerate(node_scopes_by_end):
+        if target_scope.start > scope_.end:
             node_by_end_after_index = i
-            _LOG.debug('is after node %s at %s', node, scope)
+            _LOG.debug('is after node %s at %s', node, scope_)
             break
     if node_by_end_after_index is None:
         _LOG.debug('is not after any node')
 
     node_by_start_before_index = None
-    for i, (node, scope) in enumerate(node_scopes_by_start):
-        if target_scope.end < scope.start:
+    for i, (node, scope_) in enumerate(node_scopes_by_start):
+        if target_scope.end < scope_.start:
             node_by_start_before_index = i
-            _LOG.debug('is before node %s at %s', node, scope)
+            _LOG.debug('is before node %s at %s', node, scope_)
             break
     if node_by_start_before_index is None:
         _LOG.debug('is not before any node')
 
-    node_scopes_containing_target_scope = []
-    for i, (node, scope) in enumerate(node_scopes_by_start):
-        if scope.start > target_scope.start:
+    scopes_containing_target_scope = []
+    for i, (node, scope_) in enumerate(node_scopes_by_start):
+        if scope_.start > target_scope.start:
             break
-        if scope.end > target_scope.end:
-            node_scopes_containing_target_scope.append((node, scope))
-    _LOG.debug('is within nodes %s', node_scopes_containing_target_scope)
+        if scope_.end > target_scope.end:
+            scopes_containing_target_scope.append((node, scope_))
+    _LOG.debug('is within nodes %s', scopes_containing_target_scope)
 
     if node_by_end_after_index is None:
         _LOG.debug('target %s is before first node', target_scope)
-        assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), type(nodes[0])
+        assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), \
+            type(nodes[0])
         return ([AstPathNode(nodes[0], 'body', 0)], True)
 
-    if node_by_start_before_index is None and not node_scopes_containing_target_scope:
+    if node_by_start_before_index is None and not scopes_containing_target_scope:
         _LOG.debug('target %s is after last node', target_scope)
-        assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), type(nodes[0])
+        assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), \
+            type(nodes[0])
         assert len(nodes[0].body) > 0
         return ([AstPathNode(nodes[0], 'body', len(nodes[0].body) - 1)], False)
-    elif node_by_start_before_index is None or not node_scopes_containing_target_scope:
+    elif node_by_start_before_index is None or not scopes_containing_target_scope:
         raise NotImplementedError(
             'inconsistent results for target {} in:\n"""\n{}\nafter {}, before {}, within {}"""'
             .format(target_scope, code, node_by_end_after_index, node_by_start_before_index,
-                    node_scopes_containing_target_scope))
+                    scopes_containing_target_scope))
 
     assert node_by_end_after_index is not None
     assert node_by_start_before_index is not None
-    assert len(node_scopes_containing_target_scope) > 0
+    assert scopes_containing_target_scope
     _LOG.debug(
         'target %s is neither before first node nor after last node in:\n"""\n%s\n"""'
         '\nbut between %s and %s, within %s',
         target_scope, code, node_scopes_by_end[node_by_end_after_index],
-        node_scopes_by_start[node_by_start_before_index], node_scopes_containing_target_scope)
-    within_node, _ = node_scopes_containing_target_scope[-1]
+        node_scopes_by_start[node_by_start_before_index], scopes_containing_target_scope)
+    within_node, _ = scopes_containing_target_scope[-1]
     before_node, _ = node_scopes_by_start[node_by_start_before_index]
     path = node_path_in_ast(tree, before_node)
     assert len(path) >= 2, path
@@ -220,7 +223,7 @@ def insert_at_path_in_tree(
     """Insert a new AST node into an existing AST at exactly specified location."""
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(inserted, typed_ast.ast3.AST), type(inserted)
-    #assert isinstance(anchor, typed_ast.ast3.AST), type(anchor)
+    # assert isinstance(anchor, typed_ast.ast3.AST), type(anchor)
     parent, field, index = path_to_anchor[-1]
     if not before_anchor:
         index += 1

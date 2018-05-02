@@ -14,9 +14,11 @@ from .ast_tools import \
 
 _LOG = logging.getLogger(__name__)
 
+
 def insert_comment_tokens(
         code: str, tree: typed_ast.ast3.AST,
         comment_tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+    """Insert comment tokens into an AST obtained from typed_ast parser."""
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(comment_tokens, list)
     nodes = ast_to_list(tree)
@@ -28,6 +30,7 @@ def insert_comment_tokens(
                    path_to_anchor[-1])
         tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)
     return tree
+
 
 def insert_comment_tokens_approx(
         tree: typed_ast.ast3.AST, tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
@@ -63,7 +66,7 @@ def insert_comment_tokens_approx(
                     next_node_line, _ = node_locations[node_index + 1]
                     if next_node_line == token_line:
                         eol_comment_here = False
-                #if eol_comment_here:
+                # if eol_comment_here:
                 #    raise NotImplementedError(
                 #        'code "{}" and comment "{}" in line {}'
                 #        ' -- only whole line comments are currently supported'
@@ -95,5 +98,5 @@ def insert_comment_tokens_approx(
         _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after', anchor)
         tree = insert_in_tree(tree, comment, anchor=anchor, before_anchor=before_anchor)
     _LOG.debug('tree after insertion:\n"""\n%s\n"""', typed_astunparse.dump(tree))
-    #_LOG.warning('code after insertion:\n"""\n%s\n"""', typed_astunparse.unparse(tree).strip())
+    # _LOG.warning('code after insertion:\n"""\n%s\n"""', typed_astunparse.unparse(tree).strip())
     return tree

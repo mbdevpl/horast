@@ -14,8 +14,7 @@ _LOG = logging.getLogger(__name__)
 
 
 def interleave_noncomment(inter, f, seq):
-    """Call f on each item in seq, calling inter() in between.
-    """
+    """Call f on each item in seq, calling inter() in between."""
     seq = iter(seq)
     prev = None
     try:
@@ -33,7 +32,7 @@ def interleave_noncomment(inter, f, seq):
 
 class Unparser(static_typing.unparser.Unparser):
 
-    """Extension of typed_astunpare.Unparser that handles Comment nodes."""
+    """Extension of static_typing.unparser.Unparser that handles Comment nodes."""
 
     def _List(self, t):
         self.write("[")
