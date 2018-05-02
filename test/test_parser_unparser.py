@@ -17,7 +17,7 @@ MODE_RESULTS = {
 
 TYPE_COMMENT_EXAMPLES = [
     """a = 1""",
-    """a = 1 # type: int""",
+    """a = 1  # type: int""",
     """print('abc')""",
     """print('abc')\n# printing abc"""]
 
