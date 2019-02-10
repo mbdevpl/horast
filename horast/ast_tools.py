@@ -108,9 +108,7 @@ def node_path_in_ast(
         for index, node in reversed_nodes[reversed_anchor_index:]:
             _LOG.debug('nodes[%i] is %s', index, node)
             for field_name, field_value in typed_ast.ast3.iter_fields(node):
-                if field_value is None \
-                        or isinstance(field_value, (int, float, str, type, tuple)) \
-                        or isinstance(type(field_value), t.TypingMeta):
+                if field_value is None or isinstance(field_value, (int, float, str, type, tuple)):
                     continue
                 if isinstance(field_value, list):
                     found = False
