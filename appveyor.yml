@@ -24,15 +24,6 @@ environment:
       PYTHON_VERSION: "3.7"
       PYTHON: "C:\\Python37-x64"
 
-matrix:
-  allow_failures:
-    - ARCHITECTURE: "x86"
-      PYTHON_VERSION: "3.7"
-      PYTHON: "C:\\Python37"
-    - ARCHITECTURE: "x64"
-      PYTHON_VERSION: "3.7"
-      PYTHON: "C:\\Python37-x64"
-
 init:
   - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
 
