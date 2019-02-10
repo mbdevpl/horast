@@ -78,7 +78,9 @@ class Tests(unittest.TestCase):
                 data['complete_tree'] = complete_tree
                 complete_code = unparse(complete_tree)
                 data['complete_code'] = complete_code
-                self.assertGreaterEqual(len(complete_code), len(code), (complete_code, code))
+                self.assertGreaterEqual(
+                    len(complete_code.replace(' ', '')), len(code.replace(' ', '')),
+                    (complete_code, code))
                 reparsed_tree = typed_ast.ast3.parse(code)
                 tree_nodes = ast_to_list(tree, only_localizable)
                 reparsed_tree_nodes = ast_to_list(reparsed_tree, only_localizable)
