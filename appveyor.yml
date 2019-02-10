@@ -5,9 +5,6 @@ environment:
     - ARCHITECTURE: "x86"
       PYTHON_VERSION: "3.4"
       PYTHON: "C:\\Python34"
-    - ARCHITECTURE: "x64"
-      PYTHON_VERSION: "3.4"
-      PYTHON: "C:\\Python34-x64"
     - ARCHITECTURE: "x86"
       PYTHON_VERSION: "3.5"
       PYTHON: "C:\\Python35"
@@ -20,12 +17,21 @@ environment:
     - ARCHITECTURE: "x64"
       PYTHON_VERSION: "3.6"
       PYTHON: "C:\\Python36-x64"
+    - ARCHITECTURE: "x86"
+      PYTHON_VERSION: "3.7"
+      PYTHON: "C:\\Python37"
+    - ARCHITECTURE: "x64"
+      PYTHON_VERSION: "3.7"
+      PYTHON: "C:\\Python37-x64"
 
 matrix:
   allow_failures:
+    - ARCHITECTURE: "x86"
+      PYTHON_VERSION: "3.7"
+      PYTHON: "C:\\Python37"
     - ARCHITECTURE: "x64"
-      PYTHON_VERSION: "3.4"
-      PYTHON: "C:\\Python34-x64"
+      PYTHON_VERSION: "3.7"
+      PYTHON: "C:\\Python37-x64"
 
 init:
   - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
