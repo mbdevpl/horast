@@ -18,13 +18,13 @@ matrix:
       python: "3.7"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.4.7"
+      env: TRAVIS_PYTHON_VERSION="3.4.9"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.5.4"
+      env: TRAVIS_PYTHON_VERSION="3.5.6"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6.3"
+      env: TRAVIS_PYTHON_VERSION="3.6.8"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7.2"
