@@ -53,6 +53,12 @@ class Tests(unittest.TestCase):
                 tree = parse(example)
                 self.assertIsNotNone(tree)
 
+    def test_single_line(self):
+        code = """a = 1  # a equals one after this"""
+        tree = parse(code)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(unparsed, code)
+
     def test_parse_failure(self):
         with self.assertRaises(SyntaxError):
             parse('def ill_pass(): pass', mode='eval')
