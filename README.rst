@@ -41,17 +41,18 @@ Simple example of how to use this package:
     from horast import parse, unparse
 
     tree = parse("""a = 1  # a equals one after this""")
-    print(unparse())
+    print(unparse(tree))
     # this will print the code with original comment
 
 More examples in `<examples.ipynb>`_.
 
+
 technical details
 -----------------
 
-Parser is based on built-in tokenize module and typed_ast.ast3.parse() function.
+Parser is based on built-in tokenize module, as well as community packages asttokens and typed_ast.
 
-Unparser is essentially an extension of Unparser class from typed_astunparse package.
+Unparser is essentially an extension of Unparser class from static_typing package.
 
 Nodes provided and handled by horast are listed below.
 
