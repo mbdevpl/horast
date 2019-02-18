@@ -2,10 +2,15 @@
 
 # pylint: disable=too-few-public-methods
 
+import logging
 import tokenize
 import typing as t
 
 import typed_ast.ast3
+
+from .token_tools import get_tokens
+
+_LOG = logging.getLogger(__name__)
 
 
 def _comment_token_to_ast_node(token: tokenize.TokenInfo) -> typed_ast.ast3.Str:
@@ -80,7 +85,39 @@ class Directive(typed_ast.ast3.Expr):
     #pragma acc
     """
 
-    pass
+    _allowed_prefixes = {
+        ('if',),
+        ('endif',),
+        ('def',),
+        ('undef',),
+        ('ifdef',),
+        ('pragma',),
+        ('pragma', 'omp', 'parallel'),
+        ('pragma', 'acc')}
+
+    _fields = typed_ast.ast3.Expr._fields + ('prefixes',)
+
+    @classmethod
+    def from_token(cls, token: tokenize.TokenInfo):
+        raw_value = token.string[1:]
+        raw_value_tokens = get_tokens(raw_value)
+        _LOG.warning('%s', raw_value_tokens)
+        # atok = asttokens.ASTTokens(code, tree=ast.parse(code))
+        # (s=, kind='', lineno=token.start[0], col_offset=token.start[1] + 1)
+        # value = typed_ast.ast3.parse(raw_value, mode='expr')
+        # value = (token)
+        # prefixes = ('',)
+        prefixes_len = 0
+        try:
+            # value.lineno += prefixes_len
+            raise NotImplementedError()
+        except:
+            value = _comment_token_to_ast_node(token)
+            prefixes = ()
+        return cls(
+            value=value, prefixes=typed_ast.ast3.Tuple(
+                elts=prefixes, lineno=token.start[0] + 1, col_offset=token.start[1]),
+            lineno=token.start[0], col_offset=token.start[1])
 
 
 class Docstring(typed_ast.ast3.Expr):
