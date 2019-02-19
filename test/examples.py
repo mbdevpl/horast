@@ -130,3 +130,16 @@ EXAMPLES = prepare_examples(TEMPLATES)
 # FAILING_TEMPLATES = {}
 
 # FAILING_EXAMPLES = prepare_examples(FAILING_TEMPLATES)
+
+PRAGMA_EXAMPLES = {
+    'OpenMP pragma parallel loop':
+    """#pragma omp parallel for
+for i in range(102400):
+    c[i] = a[i] + b[i]
+    """,
+    'OpenACC pragma loop auto':
+    """#pragma acc loop auto
+for i in range(102400):
+    c[i] = a[i] + b[i]
+    """
+}

@@ -7,7 +7,7 @@ import typing as t
 import typed_ast.ast3
 import typed_astunparse
 
-from .nodes import Comment
+from .nodes import Comment, Directive
 from .token_tools import get_token_locations, get_token_scopes
 from .ast_tools import \
     ast_to_list, get_ast_node_locations, find_in_ast, insert_at_path_in_tree, insert_in_tree
@@ -36,7 +36,14 @@ def insert_comment_tokens(
                 node = node[anchor.index]
             assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
             eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
-        comment = Comment.from_token(comment_token, eol=eol)
+        comment = None
+        if not eol:
+            try:
+                comment = Directive.from_token(comment_token)
+            except ValueError:
+                pass
+        if comment is None:
+            comment = Comment.from_token(comment_token, eol=eol)
         _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after',
                    path_to_anchor[-1])
         tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)

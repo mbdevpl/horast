@@ -5,10 +5,11 @@ import unittest
 import typed_ast.ast3
 import typed_astunparse
 
+from horast.nodes import Directive
 from horast.ast_tools import ast_to_list
 from horast.parser import parse
 from horast.unparser import unparse
-from .examples import EXAMPLES
+from .examples import EXAMPLES, PRAGMA_EXAMPLES
 
 MODE_RESULTS = {
     'exec': typed_ast.ast3.Module,
@@ -47,11 +48,19 @@ class Tests(unittest.TestCase):
 
     def test_parse(self):
         for name, example in EXAMPLES.items():
-            if ' with eol comments' in name or name.startswith('multiline '):
+            if name.startswith('multiline '):
                 continue
             with self.subTest(name=name, example=example):
                 tree = parse(example)
                 self.assertIsNotNone(tree)
+
+    def test_parse_directives(self):
+        for name, example in PRAGMA_EXAMPLES.items():
+            with self.subTest(name=name, example=example):
+                tree = parse(example)
+                self.assertIsNotNone(tree)
+                directives = [_ for _ in ast_to_list(tree, True) if isinstance(_, Directive)]
+                self.assertGreater(len(directives), 0, msg=typed_astunparse.dump(tree))
 
     def test_single_line(self):
         code = """a = 1  # a equals one after this"""
