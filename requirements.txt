@@ -2,5 +2,4 @@ asttokens
 static-typing
 typed-ast >= 1.1.0
 typed-astunparse
-typing >= 3.5; python_version < '3.5'
 version-query

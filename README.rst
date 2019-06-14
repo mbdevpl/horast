@@ -75,7 +75,7 @@ To do.
 requirements
 ------------
 
-CPython >= 3.4.
+CPython 3.4 or later.
 
 Python libraries as specified in `<requirements.txt>`_.
 
