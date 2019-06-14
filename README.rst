@@ -72,10 +72,23 @@ Docstring
 To do.
 
 
+Directive
+~~~~~~~~~
+
+This node will not appear in AST when Python code is parsed, and if inserted into AST manually,
+it will be rendered as comment.
+
+This node is not meant to enable preprocessing of Python, at least for now.
+
+Currently, this node is meant to work towards AST compatibility between Python and other langauges,
+to aide code generation from Python AST into code in other langauges
+(as seen in `*transpyle* project <https://github.com/mbdevpl/transpyle>`_).
+
+
 requirements
 ------------
 
-CPython 3.4 or later.
+CPython 3.5 or later.
 
 Python libraries as specified in `<requirements.txt>`_.
 

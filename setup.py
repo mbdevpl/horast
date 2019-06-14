@@ -31,7 +31,8 @@ class Package(setup_boilerplate.Package):
         'Topic :: Software Development :: Compilers',
         'Topic :: Software Development :: Pre-processors',
         'Topic :: Utilities']
-    keywords = ['abstract syntax tree', 'ast', 'parsing', 'unparsing', 'comments']
+    keywords = ['abstract syntax tree', 'ast', 'comments', 'directives', 'parsing', 'readability',
+                'type hints', 'unparsing']
 
 
 if __name__ == '__main__':
