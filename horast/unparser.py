@@ -128,6 +128,10 @@ class Unparser(static_typing.unparser.Unparser):
             self.fill('#')
         self.write(node.value.s)
 
+    def _Directive(self, node):
+        self.fill('#')
+        self.write(node.value.s)
+
 
 def unparse(tree: typed_ast.ast3.AST, *args, **kwargs) -> str:
     """Unparse AST based on typed_ast.ast3 with nodes as defined in horast.nodes into code."""
