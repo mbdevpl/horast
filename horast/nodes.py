@@ -63,6 +63,26 @@ class BlockComment(typed_ast.ast3.Expr):
             lineno=tokens[0].start[0], col_offset=tokens[0].start[1])
 
 
+class Directive(typed_ast.ast3.Expr):
+
+    """Store directive in AST.
+
+    In Python, directives would be expressed as comments, but may have special additional meaning.
+
+    Examples:
+
+    #if
+    #endif
+    #def
+    #undef
+    #ifdef
+    #pragma omp parallel loop
+    #pragma acc
+    """
+
+    pass
+
+
 class Docstring(typed_ast.ast3.Expr):
 
     """Store docstring as a special node in AST."""
