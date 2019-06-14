@@ -1,5 +1,7 @@
 """Definitions of AST nodes used to store missing syntax information."""
 
+# pylint: disable=too-few-public-methods
+
 import tokenize
 import typing as t
 
@@ -8,8 +10,8 @@ import typed_ast.ast3
 
 def _comment_token_to_ast_node(token: tokenize.TokenInfo) -> typed_ast.ast3.Str:
     """Convert comment token to its raw AST representation."""
-    return typed_ast.ast3.Str(s=token.string[1:], lineno=token.start[0],
-                              col_offset=token.start[1] + 1)
+    return typed_ast.ast3.Str(s=token.string[1:], kind='',
+                              lineno=token.start[0], col_offset=token.start[1] + 1)
 
 
 class Comment(typed_ast.ast3.Expr):
@@ -32,7 +34,7 @@ class Comment(typed_ast.ast3.Expr):
      value3)
     """
 
-    # _fields = typed_ast.ast3.Expr._fields + ('eol',)
+    _fields = typed_ast.ast3.Expr._fields + ('eol',)
 
     @classmethod
     def from_token(cls, token: tokenize.TokenInfo, eol: bool):
