@@ -32,7 +32,7 @@ build: off
 
 test_script:
   - set TEST_PACKAGING=1
-  - python -m coverage run --branch --source . -m unittest discover --verbose
+  - python -m coverage run --branch --source . -m unittest -v
 
 after_test:
   - python -m coverage report --show-missing

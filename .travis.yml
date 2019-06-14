@@ -1,5 +1,9 @@
 sudo: false
 language: generic
+addons:
+  homebrew:
+    packages:
+      - pyenv
 matrix:
   include:
     - os: linux
@@ -15,35 +19,27 @@ matrix:
       python: "3.7"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.5.6"
+      env: TRAVIS_PYTHON_VERSION="3.5"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6.8"
+      env: TRAVIS_PYTHON_VERSION="3.6"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.7.2"
+      env: TRAVIS_PYTHON_VERSION="3.7"
 
-before_install: |
-  set -e
-  if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-    brew update
-    brew install pyenv || brew upgrade pyenv
-    pyenv install "${TRAVIS_PYTHON_VERSION}"
-    export PATH="$HOME/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
-  fi
-  set +e
+before_install:
+  - .build/install_pyenv.sh
 
 install:
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
 
 script:
-  - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose
+  - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest -v
 
 after_success:
   - python -m coverage report --show-missing
   - codecov
-  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
 
 before_deploy:
   - pip3 install -U --user version_query || pip3 install -U version_query

@@ -9,7 +9,7 @@ class Package(setup_boilerplate.Package):
 
     name = 'horast'
     description = 'human-oriented ast parser/unparser'
-    download_url = 'https://github.com/mbdevpl/horast'
+    url = 'https://github.com/mbdevpl/horast'
     classifiers = [
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',
