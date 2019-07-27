@@ -5,6 +5,8 @@
 horast
 ======
 
+Human-oriented abstract syntax tree (AST) parser/unparser for Python 3 that doesn't discard comments.
+
 .. image:: https://img.shields.io/pypi/v/horast.svg
     :target: https://pypi.org/project/horast
     :alt: package version from PyPI
@@ -25,14 +27,13 @@ horast
     :target: https://codecov.io/gh/mbdevpl/horast
     :alt: test coverage from Codecov
 
-.. image:: https://img.shields.io/pypi/l/horast.svg
+.. image:: https://img.shields.io/github/license/mbdevpl/horast.svg
     :target: https://github.com/mbdevpl/horast/blob/master/NOTICE
     :alt: license
 
-Attempt at a human-oriented abstract syntax tree (AST) parser/unparser for Python 3.
-
-This package provides new AST node types which inherit from nodes in typed_ast.ast3 module.
-Additionally, it provides implementation of parser and unparser for the extended ASTs.
+This package provides new AST node types (Comment and Directive) which inherit from nodes in typed_ast.ast3 module.
+Additionally, it provides implementation of parser and unparser for the extended AST allowing
+straightforward readable code generation.
 
 Simple example of how to use this package:
 
