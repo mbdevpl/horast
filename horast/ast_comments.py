@@ -7,39 +7,98 @@ import typing as t
 import typed_ast.ast3
 import typed_astunparse
 
-from .nodes import Comment
-from .token_tools import get_token_locations, get_token_scopes
+from .nodes import Comment, Directive, Pragma, OpenMPPragma, OpenACCPragma, Include
+from .token_tools import get_token_scope, get_token_locations  # , get_token_scopes
 from .ast_tools import \
     ast_to_list, get_ast_node_locations, find_in_ast, insert_at_path_in_tree, insert_in_tree
 
 _LOG = logging.getLogger(__name__)
 
+DIRECTIVE_PREFIXES = ('if', 'endif', 'def', 'undef', 'ifdef', 'include')
+PRAGMA_PREFIXES = ('pragma', ' pragma:')
+OPENMP_PREFIXES = ('pragma omp', ' pragma: omp')
+OPENACC_PREFIXES = ('pragma acc', ' pragma: acc')
+INCLUDE_PREFIXES = ('include', ' include:')
+PREFIXES = [
+    (Include, INCLUDE_PREFIXES),
+    (OpenMPPragma, OPENMP_PREFIXES),
+    (OpenACCPragma, OPENACC_PREFIXES),
+    (Pragma, PRAGMA_PREFIXES),
+    (Directive, DIRECTIVE_PREFIXES)]
+
+
+def recognize_comment_token(token: tokenize.TokenInfo) -> type:
+    for node_type, prefixes in PREFIXES:
+        for prefix in prefixes:
+            if token.string[1:].startswith(prefix) and (
+                    any(token.string[1 + len(prefix):].startswith(_) for _ in (' ', '('))
+                    or len(token.string == 1 + len(prefix))):
+                return node_type
+    return Comment
+
+
+def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
+    if nodes is None:
+        # this is time consuming, so providing list of nodes is encouraged
+        nodes = ast_to_list(tree)
+    scope = get_token_scope(token)
+    path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
+    if before_anchor:
+        eol = False
+    else:
+        assert path_to_anchor
+        anchor = path_to_anchor[-1]
+        assert isinstance(anchor.field, str), type(anchor.field)
+        node = getattr(anchor.node, anchor.field)
+        if anchor.index is not None:
+            node = node[anchor.index]
+        assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
+        eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
+    node_type = recognize_comment_token(token)
+    kwargs = {'lineno': token.start[0], 'col_offset': token.start[1]}
+    if node_type is Comment:
+        node = node_type(comment=token.string[1:], eol=eol, **kwargs)
+    else:
+        assert not eol, token
+        if issubclass(node_type, Directive):
+            node = node_type(expr=token.string[1:], **kwargs)
+        else:
+            raise ValueError('insertion of node {} (from token "{}") is not supported'
+                             .format(node_type.__name__, token))
+
+    _LOG.debug('inserting a %s: %s %s %s', type(node).__name__, node,
+               'before' if before_anchor else 'after', path_to_anchor[-1])
+    tree = insert_at_path_in_tree(tree, node, path_to_anchor, before_anchor)
+    return tree
+
 
 def insert_comment_tokens(
         code: str, tree: typed_ast.ast3.AST,
-        comment_tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+        tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
     """Insert comment tokens into an AST obtained from typed_ast parser."""
     assert isinstance(tree, typed_ast.ast3.AST)
-    assert isinstance(comment_tokens, list)
+    assert isinstance(tokens, list)
     nodes = ast_to_list(tree)
-    scopes = get_token_scopes(comment_tokens)
-    for comment_token, scope in zip(comment_tokens, scopes):
-        path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
-        if before_anchor:
-            eol = False
-        else:
-            assert path_to_anchor
-            anchor = path_to_anchor[-1]
-            assert isinstance(anchor.field, str), type(anchor.field)
-            node = getattr(anchor.node, anchor.field)
-            if anchor.index is not None:
-                node = node[anchor.index]
-            assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
-            eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
-        comment = Comment.from_token(comment_token, eol=eol)
-        _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after',
-                   path_to_anchor[-1])
-        tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)
+    # scopes = get_token_scopes(comment_tokens)
+    # for comment_token, scope in zip(comment_tokens, scopes):
+    for token in tokens:
+        tree = insert_comment_token(token, code, tree, nodes)
+        # path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
+        # if before_anchor:
+        #     eol = False
+        # else:
+        #     assert path_to_anchor
+        #     anchor = path_to_anchor[-1]
+        #     assert isinstance(anchor.field, str), type(anchor.field)
+        #     node = getattr(anchor.node, anchor.field)
+        #     if anchor.index is not None:
+        #         node = node[anchor.index]
+        #     assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
+        #     eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
+        # comment = Comment.from_token(comment_token, eol=eol)
+        # _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after',
+        #            path_to_anchor[-1])
+        # tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)
     return tree
 
 
@@ -96,7 +155,7 @@ def insert_comment_tokens_approx(
     for token_index, token_insertion_index in reversed(list(enumerate(token_insertion_indices))):
         token = tokens[token_index]
         eol = tokens_eol_status[token_index]
-        comment = Comment.from_token(token, eol)
+        comment = Comment(token.string[1:], eol)
         if token_insertion_index == 0:
             anchor = nodes[token_insertion_index]
             before_anchor = True

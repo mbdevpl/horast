@@ -1,5 +1,6 @@
 """Unit tests for ast_comments module."""
 
+import itertools
 import unittest
 
 import typed_ast.ast3
@@ -20,24 +21,23 @@ class Tests(unittest.TestCase):
             with self.subTest(name=name, example=example):
                 tree = insert_comment_tokens(
                     example, typed_ast.ast3.parse(example), get_comment_tokens(example))
-                tree_nodes = ast_to_list(tree, only_localizable)
+                nodes = ast_to_list(tree, only_localizable)
                 self.assertIsInstance(tree, typed_ast.ast3.AST)
-                nodes = ast_to_list(typed_ast.ast3.parse(example), only_localizable)
+                non_comment_nodes = ast_to_list(typed_ast.ast3.parse(example), only_localizable)
                 comments = get_comment_tokens(example)
-                self.assertEqual(
-                    len(tree_nodes), max(1 if comments else 0, len(nodes)) + 2 * len(comments),
-                    (tree_nodes, nodes, comments))
+                expected_count = max(1 if comments else 0, len(non_comment_nodes)) + len(comments)
+                self.assertEqual(len(nodes), expected_count, (nodes, non_comment_nodes, comments))
 
     def test_comment_tokens_approx(self):
-        for name, example in EXAMPLES.items():
-            for only_localizable in (False, True):
-                with self.subTest(name=name, example=example, only_localizable=only_localizable):
-                    tree = insert_comment_tokens_approx(
-                        typed_ast.ast3.parse(example), get_comment_tokens(example))
-                    tree_nodes = ast_to_list(tree, only_localizable)
-                    self.assertIsInstance(tree, typed_ast.ast3.AST)
-                    nodes = ast_to_list(typed_ast.ast3.parse(example), only_localizable)
-                    comments = get_comment_tokens(example)
-                    self.assertEqual(
-                        len(tree_nodes), max(1 if comments else 0, len(nodes)) + 2 * len(comments),
-                        (tree_nodes, nodes, comments))
+        for (name, example), only_localizable in itertools.product(EXAMPLES.items(), (False, True)):
+            # for only_localizable in:
+            with self.subTest(name=name, example=example, only_localizable=only_localizable):
+                tree = insert_comment_tokens_approx(
+                    typed_ast.ast3.parse(example), get_comment_tokens(example))
+                nodes = ast_to_list(tree, only_localizable)
+                self.assertIsInstance(tree, typed_ast.ast3.AST)
+                non_comment_nodes = ast_to_list(typed_ast.ast3.parse(example), only_localizable)
+                comments = get_comment_tokens(example)
+                expected_count = max(1 if comments else 0, len(non_comment_nodes)) \
+                    + (0 if only_localizable else 1) * len(comments)
+                self.assertEqual(len(nodes), expected_count, (nodes, non_comment_nodes, comments))
