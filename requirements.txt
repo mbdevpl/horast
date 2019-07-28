@@ -1,5 +1,5 @@
 asttokens
-static-typing
+static-typing >= 0.2.8
 typed-ast >= 1.4.0
 typed-astunparse >= 2.1.4
 version-query
