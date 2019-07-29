@@ -58,8 +58,7 @@ def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
 
     _LOG.debug('inserting a %s: %s %s %s', type(node).__name__, node,
                'before' if before_anchor else 'after', path_to_anchor[-1])
-    tree = insert_at_path_in_tree(tree, node, path_to_anchor, before_anchor)
-    return tree
+    return insert_at_path_in_tree(tree, node, path_to_anchor, before_anchor)
 
 
 def insert_comment_tokens(
@@ -69,26 +68,8 @@ def insert_comment_tokens(
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(tokens, list)
     nodes = ast_to_list(tree)
-    # scopes = get_token_scopes(comment_tokens)
-    # for comment_token, scope in zip(comment_tokens, scopes):
     for token in tokens:
         tree = insert_comment_token(token, code, tree, nodes)
-        # path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
-        # if before_anchor:
-        #     eol = False
-        # else:
-        #     assert path_to_anchor
-        #     anchor = path_to_anchor[-1]
-        #     assert isinstance(anchor.field, str), type(anchor.field)
-        #     node = getattr(anchor.node, anchor.field)
-        #     if anchor.index is not None:
-        #         node = node[anchor.index]
-        #     assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
-        #     eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
-        # comment = Comment.from_token(comment_token, eol=eol)
-        # _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after',
-        #            path_to_anchor[-1])
-        # tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)
     return tree
 
 

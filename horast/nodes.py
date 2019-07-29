@@ -2,17 +2,10 @@
 
 # pylint: disable=too-few-public-methods
 
-# import ast
 import tokenize
-# import typing as t
+import typing as t
 
 import typed_ast.ast3
-
-
-# def _comment_token_to_ast_node(token: tokenize.TokenInfo) -> typed_ast.ast3.Str:
-#     """Convert comment token to its raw AST representation."""
-#     return typed_ast.ast3.Str(s=token.string[1:], kind='',
-#                               lineno=token.start[0], col_offset=token.start[1] + 1)
 
 
 class Comment(typed_ast.ast3.AST):
@@ -73,13 +66,9 @@ class BlockComment(typed_ast.ast3.AST):
 
     _fields = typed_ast.ast3.AST._fields + ('comments',)
 
-    # @classmethod
-    # def from_tokens(cls, tokens: t.List[tokenize.TokenInfo]):
-    #     return cls(
-    #         value=typed_ast.ast3.Tuple(
-    #             elts=[_comment_token_to_ast_node(token) for token in tokens],
-    #             lineno=tokens[0].start[0], col_offset=tokens[0].start[1]),
-    #         lineno=tokens[0].start[0], col_offset=tokens[0].start[1])
+    @classmethod
+    def from_token(cls, token: tokenize.TokenInfo, *extra_tokens: t.List[tokenize.TokenInfo]):
+        raise NotImplementedError()
 
 
 class Directive(typed_ast.ast3.AST):
