@@ -39,7 +39,9 @@ def classify_comment_token(token: tokenize.TokenInfo) -> type:
         # for prefix in prefixes:
         for prefix in getattr(node_type, '_comment_prefixes', ()):
             if is_prefixed(token.string[1:], prefix):
+                _LOG.debug('classified "%s" as %s (prefix: %s)', token.string, node_type, prefix)
                 return node_type
+    _LOG.debug('classified "%s" as %s', token.string, Comment)
     return Comment
 
 
@@ -53,10 +55,8 @@ def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
     if issubclass(node_type, Comment):
         node = node_type.from_token(token, path_to_anchor, before_anchor)
     else:
-        kwargs = {'lineno': token.start[0], 'col_offset': token.start[1]}
         if issubclass(node_type, Directive):
-            # TODO: strip prefixes from various directives/pragmas e.g. include, OpenMP, OpenACC
-            node = node_type(expr=token.string[1:], **kwargs)
+            node = node_type.from_token(token)
         else:
             raise ValueError('insertion of node {} (from token "{}") is not supported'
                              .format(node_type.__name__, token))

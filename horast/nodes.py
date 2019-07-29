@@ -2,10 +2,13 @@
 
 # pylint: disable=too-few-public-methods
 
+import logging
 import tokenize
 import typing as t
 
 import typed_ast.ast3
+
+_LOG = logging.getLogger(__name__)
 
 
 class Comment(typed_ast.ast3.AST):
@@ -91,6 +94,19 @@ class Directive(typed_ast.ast3.AST):
     _comment_prefixes = ('if', 'else', 'endif', 'def', 'undef', 'ifdef', 'ifndef')
 
     _fields = typed_ast.ast3.AST._fields + ('expr',)
+
+    @classmethod
+    def from_token(cls, token: tokenize.TokenInfo):
+        expr = token.string[1:]
+        if len(cls._comment_prefixes) == 1:
+            prefix = cls._comment_prefixes[0]
+            assert expr.startswith(prefix), expr
+            _LOG.debug(
+                'stripping prefix "%s" and following whitespace from the token %s', prefix, token)
+            expr = expr[len(prefix):].lstrip()
+        return cls(
+            expr=expr,
+            lineno=token.start[0], col_offset=token.start[1])
 
 
 class Pragma(Directive):
