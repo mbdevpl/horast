@@ -139,10 +139,10 @@ class Unparser(static_typing.unparser.Unparser):
     def _Pragma(self, node):
         self._generic_Directive(node, ' pragma: ')
 
-    def _OpenMPPragma(self, node):
+    def _OpenMpPragma(self, node):
         self._generic_Directive(node, ' pragma: acc ')
 
-    def _OpenACCPragma(self, node):
+    def _OpenAccPragma(self, node):
         self._generic_Directive(node, ' pragma: omp ')
 
     def _Include(self, node):

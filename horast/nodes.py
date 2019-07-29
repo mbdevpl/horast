@@ -98,7 +98,7 @@ class Pragma(Directive):
     pass
 
 
-class OpenMPPragma(Pragma):
+class OpenMpPragma(Pragma):
 
     """A special node for storing OpenMP pragmas in AST.
 
@@ -110,7 +110,7 @@ class OpenMPPragma(Pragma):
     pass
 
 
-class OpenACCPragma(Pragma):
+class OpenAccPragma(Pragma):
 
     """A special node for storing OpenACC pragmas in AST.
 

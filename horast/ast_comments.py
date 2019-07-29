@@ -7,7 +7,7 @@ import typing as t
 import typed_ast.ast3
 import typed_astunparse
 
-from .nodes import Comment, Directive, Pragma, OpenMPPragma, OpenACCPragma, Include
+from .nodes import Comment, Directive, Pragma, OpenMpPragma, OpenAccPragma, Include
 from .token_tools import get_token_scope, get_token_locations  # , get_token_scopes
 from .ast_tools import \
     ast_to_list, get_ast_node_locations, find_in_ast, insert_at_path_in_tree, insert_in_tree
@@ -21,8 +21,8 @@ OPENACC_PREFIXES = ('pragma acc', ' pragma: acc')
 INCLUDE_PREFIXES = ('include', ' include:')
 PREFIXES = [
     (Include, INCLUDE_PREFIXES),
-    (OpenMPPragma, OPENMP_PREFIXES),
-    (OpenACCPragma, OPENACC_PREFIXES),
+    (OpenMpPragma, OPENMP_PREFIXES),
+    (OpenAccPragma, OPENACC_PREFIXES),
     (Pragma, PRAGMA_PREFIXES),
     (Directive, DIRECTIVE_PREFIXES)]
 
