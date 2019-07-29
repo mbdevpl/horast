@@ -3,6 +3,7 @@
 import io
 import tokenize
 import typing as t
+import warnings
 
 Scope = t.NamedTuple('Scope', [('start', t.Tuple[int, int]), ('end', t.Tuple[int, int])])
 
@@ -38,6 +39,8 @@ def get_comment_tokens(code: str, ignore_type_comments: bool = True) -> t.List[t
 
 
 def get_token_locations(tokens: t.List[tokenize.TokenInfo]) -> t.List[t.Tuple[int, int]]:
+    warnings.warn('function get_token_locations is obsolete and it will be removed from horast,'
+                  ' use get_token_scope instead', DeprecationWarning)
     return [token.start for token in tokens]
 
 

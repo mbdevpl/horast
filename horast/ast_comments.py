@@ -3,6 +3,7 @@
 import logging
 import tokenize
 import typing as t
+import warnings
 
 import typed_ast.ast3
 import typed_astunparse
@@ -61,6 +62,7 @@ def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
     else:
         assert not eol, token
         if issubclass(node_type, Directive):
+            # TODO: strip prefixes from various directives/pragmas e.g. include, OpenMP, OpenACC
             node = node_type(expr=token.string[1:], **kwargs)
         else:
             raise ValueError('insertion of node {} (from token "{}") is not supported'
@@ -104,6 +106,8 @@ def insert_comment_tokens(
 
 def insert_comment_tokens_approx(
         tree: typed_ast.ast3.AST, tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+    warnings.warn('function insert_comment_tokens_approx is outdated and faulty, and it will be'
+                  ' removed from horast, use insert_comment_tokens instead', DeprecationWarning)
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(tokens, list)
     token_locations = get_token_locations(tokens)
