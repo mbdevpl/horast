@@ -3,7 +3,7 @@
 # pylint: disable=too-few-public-methods
 
 # import ast
-# import tokenize
+import tokenize
 # import typing as t
 
 import typed_ast.ast3
@@ -37,11 +37,27 @@ class Comment(typed_ast.ast3.AST):
 
     _fields = typed_ast.ast3.AST._fields + ('comment', 'eol')
 
-    # @classmethod
-    # def from_token(cls, token: tokenize.TokenInfo, eol: bool):
-    #     return cls(
-    #         value=token.string[1:], eol=eol,
-    #         lineno=token.start[0], col_offset=token.start[1])
+    @staticmethod
+    def is_eol(token: tokenize.TokenInfo, path_to_anchor, before_anchor) -> bool:
+        if before_anchor:
+            return False
+        assert path_to_anchor
+        anchor = path_to_anchor[-1]
+        assert isinstance(anchor.field, str), type(anchor.field)
+        node = getattr(anchor.node, anchor.field)
+        if anchor.index is not None:
+            node = node[anchor.index]
+        if not hasattr(node, 'lineno'):
+            raise ValueError('anchor node {} must have "lineno" attribute'
+                             .format(typed_ast.ast3.dump(node, include_attributes=True)))
+        return node.lineno == token.start[0] and node.lineno == token.end[0]
+
+    @classmethod
+    def from_token(cls, token: tokenize.TokenInfo, path_to_anchor, before_anchor):
+        eol = cls.is_eol(token, path_to_anchor, before_anchor)
+        return cls(
+            comment=token.string[1:], eol=eol,
+            lineno=token.start[0], col_offset=token.start[1])
 
 
 class BlockComment(typed_ast.ast3.AST):

@@ -28,7 +28,7 @@ PREFIXES = [
     (Directive, DIRECTIVE_PREFIXES)]
 
 
-def recognize_comment_token(token: tokenize.TokenInfo) -> type:
+def classify_comment_token(token: tokenize.TokenInfo) -> type:
     for node_type, prefixes in PREFIXES:
         for prefix in prefixes:
             if token.string[1:].startswith(prefix) and (
@@ -44,23 +44,11 @@ def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
         nodes = ast_to_list(tree)
     scope = get_token_scope(token)
     path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
-    if before_anchor:
-        eol = False
+    node_type = classify_comment_token(token)
+    if issubclass(node_type, Comment):
+        node = node_type.from_token(token, path_to_anchor, before_anchor)
     else:
-        assert path_to_anchor
-        anchor = path_to_anchor[-1]
-        assert isinstance(anchor.field, str), type(anchor.field)
-        node = getattr(anchor.node, anchor.field)
-        if anchor.index is not None:
-            node = node[anchor.index]
-        assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
-        eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
-    node_type = recognize_comment_token(token)
-    kwargs = {'lineno': token.start[0], 'col_offset': token.start[1]}
-    if node_type is Comment:
-        node = node_type(comment=token.string[1:], eol=eol, **kwargs)
-    else:
-        assert not eol, token
+        kwargs = {'lineno': token.start[0], 'col_offset': token.start[1]}
         if issubclass(node_type, Directive):
             # TODO: strip prefixes from various directives/pragmas e.g. include, OpenMP, OpenACC
             node = node_type(expr=token.string[1:], **kwargs)
