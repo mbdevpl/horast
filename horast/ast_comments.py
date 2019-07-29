@@ -15,25 +15,30 @@ from .ast_tools import \
 
 _LOG = logging.getLogger(__name__)
 
-DIRECTIVE_PREFIXES = ('if', 'endif', 'def', 'undef', 'ifdef', 'include')
-PRAGMA_PREFIXES = ('pragma', ' pragma:')
-OPENMP_PREFIXES = ('pragma omp', ' pragma: omp')
-OPENACC_PREFIXES = ('pragma acc', ' pragma: acc')
-INCLUDE_PREFIXES = ('include', ' include:')
-PREFIXES = [
-    (Include, INCLUDE_PREFIXES),
-    (OpenMpPragma, OPENMP_PREFIXES),
-    (OpenAccPragma, OPENACC_PREFIXES),
-    (Pragma, PRAGMA_PREFIXES),
-    (Directive, DIRECTIVE_PREFIXES)]
+CLASSIFIED_NODES = (Include, OpenMpPragma, OpenAccPragma, Pragma, Directive)
+
+
+def is_prefixed(text: str, prefix: str) -> bool:
+    """Check if a text (assumed to be a token value) is prefixed with a given prefix.
+
+    This is different from simple checking text.startswith(prefix),
+    because it also applies criteria normally applied by tokenizer to separate tokens.
+
+    E.g. "acc loop" is prefixed with "acc", but "accelerate" is not.
+    """
+    if not text.startswith(prefix):
+        return False
+    if len(text) == len(prefix) or prefix[-1] == ':':
+        return True
+    return any(text[len(prefix):].startswith(_) for _ in (' ', '('))
 
 
 def classify_comment_token(token: tokenize.TokenInfo) -> type:
-    for node_type, prefixes in PREFIXES:
-        for prefix in prefixes:
-            if token.string[1:].startswith(prefix) and (
-                    any(token.string[1 + len(prefix):].startswith(_) for _ in (' ', '('))
-                    or len(token.string == 1 + len(prefix))):
+    # for node_type, prefixes in PREFIXES:
+    for node_type in CLASSIFIED_NODES:
+        # for prefix in prefixes:
+        for prefix in getattr(node_type, '_comment_prefixes', ()):
+            if is_prefixed(token.string[1:], prefix):
                 return node_type
     return Comment
 

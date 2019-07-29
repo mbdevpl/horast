@@ -80,11 +80,15 @@ class Directive(typed_ast.ast3.AST):
     Examples:
 
     #if
+    #else
     #endif
     #def
     #undef
     #ifdef
+    #ifndef
     """
+
+    _comment_prefixes = ('if', 'else', 'endif', 'def', 'undef', 'ifdef', 'ifndef')
 
     _fields = typed_ast.ast3.AST._fields + ('expr',)
 
@@ -95,12 +99,11 @@ class Pragma(Directive):
 
     Examples:
 
-    #pragma once
-    #pragma ...
+    # pragma: once
     # pragma: ...
     """
 
-    pass
+    _comment_prefixes = (' pragma:',)
 
 
 class OpenMpPragma(Pragma):
@@ -109,10 +112,10 @@ class OpenMpPragma(Pragma):
 
     Examples:
 
-    #pragma omp parallel loop
+    # pragma: omp parallel for
     """
 
-    pass
+    _comment_prefixes = (' pragma: omp',)
 
 
 class OpenAccPragma(Pragma):
@@ -121,21 +124,22 @@ class OpenAccPragma(Pragma):
 
     Examples:
 
-    #pragma acc
+    # pragma: acc parallel
     """
 
-    pass
+    _comment_prefixes = (' pragma: acc',)
 
 
 class Include(Directive):
 
     """Store an include directive in AST.
 
-    #include<cstdio>
+    # include: <cstdio>
+    # include: "mpif.h"
     # include: my_header.h
     """
 
-    pass
+    _comment_prefixes = (' include:',)
 
 # class Docstring(ast.Expr):
 #

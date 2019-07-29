@@ -101,3 +101,15 @@ class Tests(unittest.TestCase):
                     typed_ast.ast3.dump(reparsed_complete_tree),
                     typed_ast.ast3.dump(complete_tree),
                     '"""\n{}\n""" vs. original """\n{}\n"""'.format(complete_code, example))
+
+    def test_roundtrip_directive(self):
+        code = """#if spam
+#else
+#endif
+#def
+#undef
+#ifdef
+#ifndef"""
+        tree = parse(code)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(code, unparsed)
