@@ -42,7 +42,3 @@ def get_token_locations(tokens: t.List[tokenize.TokenInfo]) -> t.List[t.Tuple[in
     warnings.warn('function get_token_locations is obsolete and it will be removed from horast,'
                   ' use get_token_scope instead', DeprecationWarning)
     return [token.start for token in tokens]
-
-
-def get_token_scopes(tokens: t.List[tokenize.TokenInfo]) -> t.List[Scope]:
-    return [Scope(token.start, token.end) for token in tokens]
