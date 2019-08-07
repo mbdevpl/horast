@@ -107,6 +107,15 @@ class Tests(unittest.TestCase):
         unparsed = unparse(tree).strip()
         self.assertEqual(code, unparsed)
 
+    def test_roundtrip_type_comment_ignore(self):
+        code = """class foo:
+    def bar(self):  # whatever comment
+        pass
+    bar.__baz__ = None  # type: ignore"""
+        tree = parse(code)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(unparsed, code)
+
     def test_roundtrip(self):
         only_localizable = False
         for name, example in EXAMPLES.items():
