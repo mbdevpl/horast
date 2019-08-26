@@ -12,7 +12,6 @@ _LOG = logging.getLogger(__name__)
 
 
 class Comment(typed_ast.ast3.AST):
-
     """Store code comment in AST.
 
     Examples:
@@ -35,6 +34,7 @@ class Comment(typed_ast.ast3.AST):
 
     @staticmethod
     def is_eol(token: tokenize.TokenInfo, path_to_anchor, before_anchor) -> bool:
+        """Determine if a given comment token is an end-of-line comment or not."""
         if before_anchor:
             return False
         assert path_to_anchor
@@ -57,7 +57,6 @@ class Comment(typed_ast.ast3.AST):
 
 
 class BlockComment(typed_ast.ast3.AST):
-
     """Store sequence of code comments as a single node in AST.
 
     Example:
@@ -75,7 +74,6 @@ class BlockComment(typed_ast.ast3.AST):
 
 
 class Directive(typed_ast.ast3.AST):
-
     """Store directive in AST.
 
     In Python, directives would be expressed as comments, but may have special additional meaning.
@@ -97,6 +95,7 @@ class Directive(typed_ast.ast3.AST):
 
     @classmethod
     def from_token(cls, token: tokenize.TokenInfo):
+        """Create a Directive from a comment token."""
         expr = token.string[1:]
         if len(cls._comment_prefixes) == 1:
             prefix = cls._comment_prefixes[0]
@@ -110,7 +109,6 @@ class Directive(typed_ast.ast3.AST):
 
 
 class Pragma(Directive):
-
     """Store a pragma in AST.
 
     Examples:
@@ -123,7 +121,6 @@ class Pragma(Directive):
 
 
 class OpenMpPragma(Pragma):
-
     """A special node for storing OpenMP pragmas in AST.
 
     Examples:
@@ -135,7 +132,6 @@ class OpenMpPragma(Pragma):
 
 
 class OpenAccPragma(Pragma):
-
     """A special node for storing OpenACC pragmas in AST.
 
     Examples:
@@ -147,7 +143,6 @@ class OpenAccPragma(Pragma):
 
 
 class Include(Directive):
-
     """Store an include directive in AST.
 
     # include: <cstdio>

@@ -15,6 +15,7 @@ TypedAstValidatorBase = AstValidatorBase[typed_ast.ast3]
 
 
 class AstValidator(TypedAstValidatorBase):
+    """AST validator for syntax trees obtained by using horast."""
 
     statement_types = (*TypedAstValidatorBase.statement_types, Comment, Directive)
 
