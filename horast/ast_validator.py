@@ -19,6 +19,8 @@ class AstValidator(TypedAstValidatorBase):
 
     statement_types = (*TypedAstValidatorBase.statement_types, Comment, Directive)
 
+    expression_types = (*TypedAstValidatorBase.expression_types, Comment)
+
     def validate_Comment(self, comment):
         assert hasattr(comment, 'comment')
         assert isinstance(comment.comment, str), type(comment.comment)
