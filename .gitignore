@@ -13,7 +13,9 @@ desktop.ini
 /dist
 /.cache
 __pycache__
+*.dist-info
 *.egg
+*.eggs
 *.egg-info
 *.pyc
 
