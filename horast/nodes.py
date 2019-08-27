@@ -2,20 +2,16 @@
 
 # pylint: disable=too-few-public-methods
 
+import logging
 import tokenize
 import typing as t
 
 import typed_ast.ast3
 
-
-def _comment_token_to_ast_node(token: tokenize.TokenInfo) -> typed_ast.ast3.Str:
-    """Convert comment token to its raw AST representation."""
-    return typed_ast.ast3.Str(s=token.string[1:], kind='',
-                              lineno=token.start[0], col_offset=token.start[1] + 1)
+_LOG = logging.getLogger(__name__)
 
 
-class Comment(typed_ast.ast3.Expr):
-
+class Comment(typed_ast.ast3.AST):
     """Store code comment in AST.
 
     Examples:
@@ -34,17 +30,33 @@ class Comment(typed_ast.ast3.Expr):
      value3)
     """
 
-    _fields = typed_ast.ast3.Expr._fields + ('eol',)
+    _fields = typed_ast.ast3.AST._fields + ('comment', 'eol')
+
+    @staticmethod
+    def is_eol(token: tokenize.TokenInfo, path_to_anchor, before_anchor) -> bool:
+        """Determine if a given comment token is an end-of-line comment or not."""
+        if before_anchor:
+            return False
+        assert path_to_anchor
+        anchor = path_to_anchor[-1]
+        assert isinstance(anchor.field, str), type(anchor.field)
+        node = getattr(anchor.node, anchor.field)
+        if anchor.index is not None:
+            node = node[anchor.index]
+        if not hasattr(node, 'lineno'):
+            raise ValueError('anchor node {} must have "lineno" attribute'
+                             .format(typed_ast.ast3.dump(node, include_attributes=True)))
+        return node.lineno == token.start[0] and node.lineno == token.end[0]
 
     @classmethod
-    def from_token(cls, token: tokenize.TokenInfo, eol: bool):
+    def from_token(cls, token: tokenize.TokenInfo, path_to_anchor, before_anchor):
+        eol = cls.is_eol(token, path_to_anchor, before_anchor)
         return cls(
-            value=_comment_token_to_ast_node(token), eol=eol,
+            comment=token.string[1:], eol=eol,
             lineno=token.start[0], col_offset=token.start[1])
 
 
-class BlockComment(typed_ast.ast3.Expr):
-
+class BlockComment(typed_ast.ast3.AST):
     """Store sequence of code comments as a single node in AST.
 
     Example:
@@ -54,17 +66,14 @@ class BlockComment(typed_ast.ast3.Expr):
     # 3rd line of a comment
     """
 
+    _fields = typed_ast.ast3.AST._fields + ('comments',)
+
     @classmethod
-    def from_tokens(cls, tokens: t.List[tokenize.TokenInfo]):
-        return cls(
-            value=typed_ast.ast3.Tuple(
-                elts=[_comment_token_to_ast_node(token) for token in tokens],
-                lineno=tokens[0].start[0], col_offset=tokens[0].start[1]),
-            lineno=tokens[0].start[0], col_offset=tokens[0].start[1])
+    def from_token(cls, token: tokenize.TokenInfo, *extra_tokens: t.List[tokenize.TokenInfo]):
+        raise NotImplementedError()
 
 
-class Directive(typed_ast.ast3.Expr):
-
+class Directive(typed_ast.ast3.AST):
     """Store directive in AST.
 
     In Python, directives would be expressed as comments, but may have special additional meaning.
@@ -72,21 +81,73 @@ class Directive(typed_ast.ast3.Expr):
     Examples:
 
     #if
+    #else
     #endif
     #def
     #undef
     #ifdef
-    #pragma omp parallel loop
-    #pragma acc
+    #ifndef
     """
 
-    pass
+    _comment_prefixes = ('if', 'else', 'endif', 'def', 'undef', 'ifdef', 'ifndef')
 
-
-class Docstring(typed_ast.ast3.Expr):
-
-    """Store docstring as a special node in AST."""
+    _fields = typed_ast.ast3.AST._fields + ('expr',)
 
     @classmethod
-    def from_str_expr(cls, str_expr: typed_ast.ast3.Expr):
-        raise NotImplementedError()
+    def from_token(cls, token: tokenize.TokenInfo):
+        """Create a Directive from a comment token."""
+        expr = token.string[1:]
+        if len(cls._comment_prefixes) == 1:
+            prefix = cls._comment_prefixes[0]
+            assert expr.startswith(prefix), expr
+            _LOG.debug(
+                'stripping prefix "%s" and following whitespace from the token %s', prefix, token)
+            expr = expr[len(prefix):].lstrip()
+        return cls(
+            expr=expr,
+            lineno=token.start[0], col_offset=token.start[1])
+
+
+class Pragma(Directive):
+    """Store a pragma in AST.
+
+    Examples:
+
+    # pragma: once
+    # pragma: ...
+    """
+
+    _comment_prefixes = (' pragma:',)
+
+
+class OpenMpPragma(Pragma):
+    """A special node for storing OpenMP pragmas in AST.
+
+    Examples:
+
+    # pragma: omp parallel for
+    """
+
+    _comment_prefixes = (' pragma: omp',)
+
+
+class OpenAccPragma(Pragma):
+    """A special node for storing OpenACC pragmas in AST.
+
+    Examples:
+
+    # pragma: acc parallel
+    """
+
+    _comment_prefixes = (' pragma: acc',)
+
+
+class Include(Directive):
+    """Store an include directive in AST.
+
+    # include: <cstdio>
+    # include: "mpif.h"
+    # include: my_header.h
+    """
+
+    _comment_prefixes = (' include:',)

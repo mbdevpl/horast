@@ -6,6 +6,7 @@ import typed_ast.ast3
 import typed_astunparse
 
 from horast.ast_tools import ast_to_list
+from horast.nodes import Directive, OpenMpPragma, OpenAccPragma
 from horast.parser import parse
 from horast.unparser import unparse
 from .examples import EXAMPLES
@@ -53,12 +54,6 @@ class Tests(unittest.TestCase):
                 tree = parse(example)
                 self.assertIsNotNone(tree)
 
-    def test_single_line(self):
-        code = """a = 1  # a equals one after this"""
-        tree = parse(code)
-        unparsed = unparse(tree).strip()
-        self.assertEqual(unparsed, code)
-
     def test_parse_failure(self):
         with self.assertRaises(SyntaxError):
             parse('def ill_pass(): pass', mode='eval')
@@ -70,6 +65,47 @@ class Tests(unittest.TestCase):
                 code = unparse(tree)
                 reparsed_tree = typed_ast.ast3.parse(code)
                 self.assertEqual(typed_ast.ast3.dump(reparsed_tree), typed_ast.ast3.dump(tree))
+
+    def test_roundtrip_comment(self):
+        code = """a = 1  # a equals one after this"""
+        tree = parse(code)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(unparsed, code)
+
+    def test_roundtrip_directive(self):
+        code = """#if spam
+#else
+#endif
+#def
+#undef
+#ifdef
+#ifndef"""
+        tree = parse(code)
+        for node in tree.body:
+            self.assertIsInstance(node, Directive)
+            self.assertIs(type(node), Directive)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(code, unparsed)
+
+    def test_roundtrip_openmp_pragma(self):
+        code = """# pragma: omp parallel for
+# pragma: omp parallel do
+# pragma: omp barrier"""
+        tree = parse(code)
+        for node in tree.body:
+            self.assertIsInstance(node, OpenMpPragma)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(code, unparsed)
+
+    def test_roundtrip_openacc_pragma(self):
+        code = """# pragma: acc parallel
+# pragma: acc end parallel
+# pragma: acc parallel loop gang"""
+        tree = parse(code)
+        for node in tree.body:
+            self.assertIsInstance(node, OpenAccPragma)
+        unparsed = unparse(tree).strip()
+        self.assertEqual(code, unparsed)
 
     def test_roundtrip(self):
         only_localizable = False

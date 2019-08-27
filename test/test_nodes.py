@@ -19,12 +19,12 @@ class Tests(unittest.TestCase):
         _LOG.warning('%s', comment_fields)
         self.assertGreater(len(comment_fields), len(expr_fields))
 
-        comment = Comment(typed_ast.ast3.Str(' comment', ''), False)
+        comment = Comment(' comment', False)
         self.assertFalse(comment.eol)
 
-        eol_comment = Comment(typed_ast.ast3.Str(' comment', ''), True)
+        eol_comment = Comment(' comment', True)
         self.assertTrue(eol_comment.eol)
 
-        default_comment = Comment(typed_ast.ast3.Str(' comment', ''))
+        default_comment = Comment(' comment')
         with self.assertRaises(AttributeError):
             default_comment.eol

@@ -3,48 +3,85 @@
 import logging
 import tokenize
 import typing as t
+import warnings
 
 import typed_ast.ast3
 import typed_astunparse
 
-from .nodes import Comment
-from .token_tools import get_token_locations, get_token_scopes
+from .nodes import Comment, Directive, Pragma, OpenMpPragma, OpenAccPragma, Include
+from .token_tools import get_token_scope, get_token_locations  # , get_token_scopes
 from .ast_tools import \
     ast_to_list, get_ast_node_locations, find_in_ast, insert_at_path_in_tree, insert_in_tree
 
 _LOG = logging.getLogger(__name__)
 
+CLASSIFIED_NODES = (Include, OpenMpPragma, OpenAccPragma, Pragma, Directive)
+
+
+def is_prefixed(text: str, prefix: str) -> bool:
+    """Check if a text (assumed to be a token value) is prefixed with a given prefix.
+
+    This is different from simple checking text.startswith(prefix),
+    because it also applies criteria normally applied by tokenizer to separate tokens.
+
+    E.g. "acc loop" is prefixed with "acc", but "accelerate" is not.
+    """
+    if not text.startswith(prefix):
+        return False
+    if len(text) == len(prefix) or prefix[-1] == ':':
+        return True
+    return any(text[len(prefix):].startswith(_) for _ in (' ', '('))
+
+
+def classify_comment_token(token: tokenize.TokenInfo) -> type:
+    # for node_type, prefixes in PREFIXES:
+    for node_type in CLASSIFIED_NODES:
+        # for prefix in prefixes:
+        for prefix in getattr(node_type, '_comment_prefixes', ()):
+            if is_prefixed(token.string[1:], prefix):
+                _LOG.debug('classified "%s" as %s (prefix: %s)', token.string, node_type, prefix)
+                return node_type
+    _LOG.debug('classified "%s" as %s', token.string, Comment)
+    return Comment
+
+
+def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
+    if nodes is None:
+        # this is time consuming, so providing list of nodes is encouraged
+        nodes = ast_to_list(tree)
+    scope = get_token_scope(token)
+    path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
+    node_type = classify_comment_token(token)
+    if issubclass(node_type, Comment):
+        node = node_type.from_token(token, path_to_anchor, before_anchor)
+    else:
+        if issubclass(node_type, Directive):
+            node = node_type.from_token(token)
+        else:
+            raise ValueError('insertion of node {} (from token "{}") is not supported'
+                             .format(node_type.__name__, token))
+
+    _LOG.debug('inserting a %s: %s %s %s', type(node).__name__, node,
+               'before' if before_anchor else 'after', path_to_anchor[-1])
+    return insert_at_path_in_tree(tree, node, path_to_anchor, before_anchor)
+
 
 def insert_comment_tokens(
         code: str, tree: typed_ast.ast3.AST,
-        comment_tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+        tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
     """Insert comment tokens into an AST obtained from typed_ast parser."""
     assert isinstance(tree, typed_ast.ast3.AST)
-    assert isinstance(comment_tokens, list)
+    assert isinstance(tokens, list)
     nodes = ast_to_list(tree)
-    scopes = get_token_scopes(comment_tokens)
-    for comment_token, scope in zip(comment_tokens, scopes):
-        path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
-        if before_anchor:
-            eol = False
-        else:
-            assert path_to_anchor
-            anchor = path_to_anchor[-1]
-            assert isinstance(anchor.field, str), type(anchor.field)
-            node = getattr(anchor.node, anchor.field)
-            if anchor.index is not None:
-                node = node[anchor.index]
-            assert hasattr(node, 'lineno'), typed_ast.ast3.dump(node, include_attributes=True)
-            eol = node.lineno == scope.start[0] and node.lineno == scope.end[0]
-        comment = Comment.from_token(comment_token, eol=eol)
-        _LOG.debug('inserting %s %s %s', comment, 'before' if before_anchor else 'after',
-                   path_to_anchor[-1])
-        tree = insert_at_path_in_tree(tree, comment, path_to_anchor, before_anchor)
+    for token in tokens:
+        tree = insert_comment_token(token, code, tree, nodes)
     return tree
 
 
 def insert_comment_tokens_approx(
         tree: typed_ast.ast3.AST, tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+    warnings.warn('function insert_comment_tokens_approx is outdated and faulty, and it will be'
+                  ' removed from horast, use insert_comment_tokens instead', DeprecationWarning)
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(tokens, list)
     token_locations = get_token_locations(tokens)
@@ -96,7 +133,7 @@ def insert_comment_tokens_approx(
     for token_index, token_insertion_index in reversed(list(enumerate(token_insertion_indices))):
         token = tokens[token_index]
         eol = tokens_eol_status[token_index]
-        comment = Comment.from_token(token, eol)
+        comment = Comment(token.string[1:], eol)
         if token_insertion_index == 0:
             anchor = nodes[token_insertion_index]
             before_anchor = True

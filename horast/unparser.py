@@ -126,11 +126,30 @@ class Unparser(static_typing.unparser.Unparser):
             self.write('  #')
         else:
             self.fill('#')
-        self.write(node.value.s)
+        # import ipdb; ipdb.set_trace()
+        self.write(node.comment)
+
+    def _generic_Directive(self, node, prefix: str = ''):
+        self.fill('#{}'.format(prefix))
+        self.write(node.expr)
 
     def _Directive(self, node):
-        self.fill('#')
-        self.write(node.value.s)
+        self._generic_Directive(node)
+
+    def _generic_Pragma(self, node, prefix: str = ''):
+        self._generic_Directive(node, ' pragma: {}'.format(prefix))
+
+    def _Pragma(self, node):
+        self._generic_Pragma(node)
+
+    def _OpenMpPragma(self, node):
+        self._generic_Pragma(node, 'omp ')
+
+    def _OpenAccPragma(self, node):
+        self._generic_Pragma(node, 'acc ')
+
+    def _Include(self, node):
+        self._generic_Directive(node, ' include: ')
 
 
 def unparse(tree: typed_ast.ast3.AST, *args, **kwargs) -> str:

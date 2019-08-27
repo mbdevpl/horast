@@ -4,7 +4,7 @@ import unittest
 
 import typed_ast.ast3
 
-from horast.token_tools import Scope, get_comment_tokens, get_token_scopes
+from horast.token_tools import Scope, get_comment_tokens, get_token_scope
 from horast.ast_tools import \
     ast_to_list, get_ast_node_locations, convert_1d_str_index_to_2d, get_ast_node_scopes, \
     find_in_ast
@@ -100,8 +100,8 @@ class Tests(unittest.TestCase):
             if ' with eol comments' in name or name.startswith('multiline '):
                 continue
             comment_tokens = get_comment_tokens(example)
-            scopes = get_token_scopes(comment_tokens)
-            for scope in scopes:
+            for token in comment_tokens:
+                scope = get_token_scope(token)
                 with self.subTest(name=name, example=example, scope=scope):
                     tree = typed_ast.ast3.parse(example)
                     nodes = ast_to_list(tree)
