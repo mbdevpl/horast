@@ -151,11 +151,3 @@ class Include(Directive):
     """
 
     _comment_prefixes = (' include:',)
-
-# class Docstring(ast.Expr):
-#
-#     """Store docstring as a special node in AST."""
-#
-#     @classmethod
-#     def from_str_expr(cls, str_expr: typed_ast.ast3.Expr):
-#         raise NotImplementedError()
