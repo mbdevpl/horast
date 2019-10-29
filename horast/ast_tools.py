@@ -6,21 +6,24 @@ import re
 import typing as t
 
 import asttokens
+import colorama
 from static_typing.ast_manipulation import RecursiveAstVisitor
 import typed_ast.ast3
 
-from .token_tools import Scope
+from .token_tools import Location, Scope
 
 _LOG = logging.getLogger(__name__)
 
 AstPathNode = t.NamedTuple('AstPathNode', [
-    ('node', typed_ast.ast3.AST), ('field', t.Optional[str]), ('index', t.Optional[int])])
+    ('node', typed_ast.ast3.AST), ('field', t.Optional[str]), ('index', t.Optional[int]),
+    ('scope', Scope)])
 """Node on a AST path.
 
 Meaning of fields:
 - node is an AST node on the path
 - field is name of the field in that node; None if node is the final (i.e. target) node of the path
 - index is index of the next node in the field if value of the field is a list, None otherwise
+- scope is location of the above location in the source code
 """
 
 
@@ -62,11 +65,13 @@ def convert_1d_str_index_to_2d(
     col_offset = index
     if newline_starts and lineno > 1:
         col_offset -= newline_starts[lineno - 2]
-    _LOG.debug('converted %s[%i] into (%i, %i)', repr(text), index, lineno, col_offset)
-    return lineno, col_offset
+    _LOG.log(logging.NOTSET, 'converted %s[%i] into (%i, %i)',
+             repr(text), index, lineno, col_offset)
+    return Location(lineno, col_offset)
 
 
 def get_ast_node_scopes(code: str, nodes: t.List[typed_ast.ast3.AST]) -> t.List[Scope]:
+    """Get locations in source code for each given AST node."""
     atok = asttokens.ASTTokens(code, tree=ast.parse(code))
     ast_nodes = ast_to_list(atok.tree)
     assert len(ast_nodes) == len(nodes), (len(ast_nodes), len(nodes))
@@ -77,35 +82,44 @@ def get_ast_node_scopes(code: str, nodes: t.List[typed_ast.ast3.AST]) -> t.List[
     for node in ast_nodes:
         raw_node_scope = atok.get_text_range(node)
         _LOG.debug(
-            'node %s at %s: code="""%s""", tree=%s',
-            type(node).__name__, raw_node_scope, atok.get_text(node), ast.dump(node))
+            'node %s at %s: code="""%s%s%s""", tree=%s%s%s',
+            type(node).__name__, raw_node_scope, colorama.Style.DIM, atok.get_text(node),
+            colorama.Style.RESET_ALL, colorama.Style.DIM, ast.dump(node), colorama.Style.RESET_ALL)
         node_scope = Scope(*[
             convert_1d_str_index_to_2d(code, _, newline_starts=newline_starts)
             for _ in raw_node_scope])
-        _LOG.debug('scope %s is %s', raw_node_scope, node_scope)
+        _LOG.log(logging.NOTSET, 'scope %s is %s', raw_node_scope, node_scope)
         scopes.append(node_scope)
     return scopes
 
 
-def node_path_in_ast(
-        tree: typed_ast.ast3.AST,
-        target_node: typed_ast.ast3.AST) -> t.List[AstPathNode]:
+def node_path_in_ast(code: str, tree: typed_ast.ast3.AST, target_node: typed_ast.ast3.AST,
+                     *, nodes=None, scopes=None) -> t.List[AstPathNode]:
     """Find path to node in the given AST.
 
     Return a list of AstPathNode from root node up to the target node.
+
+    Last 2 argument "nodes" and "scopes" are optional but when calling this function many times
+    for the same AST providing them is encouraged as constructing those lists is time consuming.
     """
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(target_node, typed_ast.ast3.AST), type(target_node)
     _LOG.debug('looking for node: %s', typed_ast.ast3.dump(target_node, include_attributes=True))
-    nodes = ast_to_list(tree)
-    nodes = nodes[:nodes.index(target_node) + 1]
-    node_path = [AstPathNode(target_node, None, None)]
+    if nodes is None:
+        nodes = ast_to_list(tree)
+    assert target_node in nodes
+    if scopes is None:
+        scopes = get_ast_node_scopes(code, nodes)
+    target_node_index = nodes.index(target_node)
+    nodes = nodes[:target_node_index + 1]
+    scopes = scopes[:target_node_index + 1]
+    node_path = [AstPathNode(target_node, None, None, scopes[target_node_index])]
     current_anchor = target_node
     reversed_anchor_index = 0
-    reversed_nodes = list(reversed(list(enumerate(nodes))))
+    reversed_nodes_scopes = list(reversed(list(enumerate(zip(nodes, scopes)))))
     while current_anchor is not nodes[0]:
         reversed_anchor_index += 1
-        for index, node in reversed_nodes[reversed_anchor_index:]:
+        for index, (node, scope) in reversed_nodes_scopes[reversed_anchor_index:]:
             _LOG.debug('nodes[%i] is %s', index, node)
             for field_name, field_value in typed_ast.ast3.iter_fields(node):
                 if field_value is None or isinstance(field_value, (int, float, str, type, tuple)):
@@ -116,7 +130,7 @@ def node_path_in_ast(
                         if field_value_elem is current_anchor:
                             current_anchor = node
                             reversed_anchor_index += index
-                            node_path.append(AstPathNode(node, field_name, i))
+                            node_path.append(AstPathNode(node, field_name, i, scope))
                             found = True
                             _LOG.debug('"%s[%i]" of %s is on the path', field_name, i, node)
                             break
@@ -126,23 +140,28 @@ def node_path_in_ast(
                 if field_value is current_anchor:
                     current_anchor = node
                     reversed_anchor_index += index
-                    node_path.append(AstPathNode(node, field_name, None))
+                    node_path.append(AstPathNode(node, field_name, None, scope))
                     _LOG.debug('"%s" of %s is on the path', field_name, node)
                     break
     return list(reversed(node_path))
 
 
-def find_in_ast(
-        code: str, tree: typed_ast.ast3.AST, nodes: t.List[typed_ast.ast3.AST],
-        scope: Scope) -> t.Tuple[t.List[AstPathNode], bool]:
+def find_in_ast(code: str, tree: typed_ast.ast3.AST, scope: Scope,
+                *, nodes: t.List[typed_ast.ast3.AST] = None,
+                scopes=None) -> t.Tuple[t.List[AstPathNode], bool]:
     """Return tuple: (path, before).
 
     Where:
     - path is path to the anchor node for the target scope
     - before is boolean flag set to True if target scope is before the anchor node, False otherwise
+
+    Last 2 argument "nodes" and "scopes" are optional but when calling this function many times
+    for the same AST providing them is encouraged as constructing those lists is time consuming.
     """
-    scopes = get_ast_node_scopes(code, nodes)
-    assert len(nodes) == len(scopes), (len(nodes), len(scopes))
+    if nodes is None:
+        nodes = ast_to_list(tree)
+    if scopes is None:
+        scopes = get_ast_node_scopes(code, nodes)
     node_scopes_by_start = list(zip(nodes, scopes))
     node_scopes_by_start.sort(key=lambda _: _[1].end, reverse=True)
     node_scopes_by_start.sort(key=lambda _: _[1].start)
@@ -184,15 +203,16 @@ def find_in_ast(
         _LOG.debug('target %s is before first node', target_scope)
         assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), \
             type(nodes[0])
-        return ([AstPathNode(nodes[0], 'body', 0)], True)
+        return ([AstPathNode(nodes[0], 'body', 0, scopes[0])], True)
 
     if node_by_start_before_index is None and not scopes_containing_target_scope:
         _LOG.debug('target %s is after last node', target_scope)
         assert isinstance(nodes[0], (typed_ast.ast3.Module, typed_ast.ast3.Interactive)), \
             type(nodes[0])
         assert len(nodes[0].body) > 0
-        return ([AstPathNode(nodes[0], 'body', len(nodes[0].body) - 1)], False)
-    elif node_by_start_before_index is None or not scopes_containing_target_scope:
+        return ([AstPathNode(nodes[0], 'body', len(nodes[0].body) - 1, scopes[0])], False)
+
+    if node_by_start_before_index is None or not scopes_containing_target_scope:
         raise NotImplementedError(
             'inconsistent results for target {} in:\n"""\n{}\nafter {}, before {}, within {}"""'
             .format(target_scope, code, node_by_end_after_index, node_by_start_before_index,
@@ -208,7 +228,7 @@ def find_in_ast(
         node_scopes_by_start[node_by_start_before_index], scopes_containing_target_scope)
     within_node, _ = scopes_containing_target_scope[-1]
     before_node, _ = node_scopes_by_start[node_by_start_before_index]
-    path = node_path_in_ast(tree, before_node)
+    path = node_path_in_ast(code, tree, before_node, nodes=nodes, scopes=scopes)
     assert len(path) >= 2, path
     assert path[-2].node is within_node, (path[-2].node, within_node)
     return (path[:-1], True)
@@ -222,7 +242,7 @@ def insert_at_path_in_tree(
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(inserted, typed_ast.ast3.AST), type(inserted)
     # assert isinstance(anchor, typed_ast.ast3.AST), type(anchor)
-    parent, field, index = path_to_anchor[-1]
+    parent, field, index = path_to_anchor[-1][:3]
     if not before_anchor:
         index += 1
     getattr(parent, field).insert(index, inserted)
@@ -232,14 +252,16 @@ def insert_at_path_in_tree(
 def insert_in_tree(
         tree: typed_ast.ast3.AST, inserted: typed_ast.ast3.AST, anchor: typed_ast.ast3.AST,
         before_anchor: bool = False, strict: bool = False) -> typed_ast.ast3.AST:
-    """Insert a new AST node into an existing AST near the anchor node.
+    """Deprecated, use insert_at_path_in_tree instead.
+
+    Insert a new AST node into an existing AST near the anchor node.
 
     Try to maintain correctness after insertion.
     """
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(inserted, typed_ast.ast3.AST), type(inserted)
     assert isinstance(anchor, typed_ast.ast3.AST), type(anchor)
-    node_path = node_path_in_ast(tree, anchor)
+    node_path = node_path_in_ast('', tree, anchor)
     if node_path is None:
         raise ValueError('the anchor node {} not found in AST {}'.format(anchor, tree))
     _LOG.debug('node path: %s', node_path)

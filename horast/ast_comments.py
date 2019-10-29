@@ -11,7 +11,8 @@ import typed_astunparse
 from .nodes import Comment, Directive, Pragma, OpenMpPragma, OpenAccPragma, Include
 from .token_tools import get_token_scope, get_token_locations  # , get_token_scopes
 from .ast_tools import \
-    ast_to_list, get_ast_node_locations, find_in_ast, insert_at_path_in_tree, insert_in_tree
+    ast_to_list, get_ast_node_locations, get_ast_node_scopes, find_in_ast, \
+    insert_at_path_in_tree, insert_in_tree
 
 _LOG = logging.getLogger(__name__)
 
@@ -45,12 +46,19 @@ def classify_comment_token(token: tokenize.TokenInfo) -> type:
     return Comment
 
 
-def insert_comment_token(token: tokenize.TokenInfo, code, tree, nodes=None):
+def insert_comment_token(token: tokenize.TokenInfo, code: str, tree: typed_ast.ast3.AST,
+                         *, nodes=None, scopes=None):
+    """Insert comment into the syntax tree.
+
+    Last 2 argument "nodes" and "scopes" are optional but when calling this function many times
+    for the same AST providing them is encouraged as constructing those lists is time consuming.
+    """
     if nodes is None:
-        # this is time consuming, so providing list of nodes is encouraged
         nodes = ast_to_list(tree)
+    if scopes is None:
+        scopes = get_ast_node_scopes(code, nodes)
     scope = get_token_scope(token)
-    path_to_anchor, before_anchor = find_in_ast(code, tree, nodes, scope)
+    path_to_anchor, before_anchor = find_in_ast(code, tree, scope, nodes=nodes, scopes=scopes)
     node_type = classify_comment_token(token)
     if issubclass(node_type, Comment):
         node = node_type.from_token(token, path_to_anchor, before_anchor)
@@ -73,13 +81,16 @@ def insert_comment_tokens(
     assert isinstance(tree, typed_ast.ast3.AST)
     assert isinstance(tokens, list)
     nodes = ast_to_list(tree)
+    scopes = get_ast_node_scopes(code, nodes)
+    assert len(nodes) == len(scopes), (len(nodes), len(scopes))
     for token in tokens:
-        tree = insert_comment_token(token, code, tree, nodes)
+        tree = insert_comment_token(token, code, tree, nodes=nodes, scopes=scopes)
     return tree
 
 
 def insert_comment_tokens_approx(
         tree: typed_ast.ast3.AST, tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+    """Deprecated, use insert_comment_tokens instead."""
     warnings.warn('function insert_comment_tokens_approx is outdated and faulty, and it will be'
                   ' removed from horast, use insert_comment_tokens instead', DeprecationWarning)
     assert isinstance(tree, typed_ast.ast3.AST)

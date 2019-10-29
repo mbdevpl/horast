@@ -5,11 +5,13 @@ import tokenize
 import typing as t
 import warnings
 
+Location = t.NamedTuple('Location', [('lineno', int), ('offset', int)])
+
 Scope = t.NamedTuple('Scope', [('start', t.Tuple[int, int]), ('end', t.Tuple[int, int])])
 
 
 def get_token_scope(token: tokenize.TokenInfo):
-    return Scope(token.start, token.end)
+    return Scope(Location(*token.start), Location(*token.end))
 
 
 def get_tokens(code: str, token_filter=None) -> t.List[tokenize.TokenInfo]:
