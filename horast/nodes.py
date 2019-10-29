@@ -51,9 +51,9 @@ class Comment(typed_ast.ast3.AST):
         token_scope = get_token_scope(token)
         assert token_scope.start.lineno == token_scope.end.lineno, token_scope
         assert token_scope.start.offset < token_scope.end.offset, token_scope
-        eol = node.lineno == token.start[0] and node.lineno == token.end[0]
+        eol = anchor.scope.end.lineno == token_scope.start.lineno
         _LOG.debug('comment scope: %s, anchor scope: %s, evaluated EOL status: %s',
-                   (token.start[0], token.end[0]), (node.lineno,), eol)
+                   (token.start[0], token.end[0], token_scope), (node.lineno, anchor.scope), eol)
         return eol
 
     @classmethod
