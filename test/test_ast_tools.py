@@ -90,8 +90,7 @@ class Tests(unittest.TestCase):
                                   convert_1d_str_index_to_2d(example, end_index))
                     with self.subTest(name=name, example=example, scope=scope):
                         tree = typed_ast.ast3.parse(example)
-                        nodes = ast_to_list(tree)
-                        path, before = find_in_ast(example, tree, nodes, scope)
+                        path, before = find_in_ast(example, tree, scope)
                         self.assertIsInstance(path, list)
                         self.assertIsInstance(before, bool)
 
@@ -104,7 +103,6 @@ class Tests(unittest.TestCase):
                 scope = get_token_scope(token)
                 with self.subTest(name=name, example=example, scope=scope):
                     tree = typed_ast.ast3.parse(example)
-                    nodes = ast_to_list(tree)
-                    path, before = find_in_ast(example, tree, nodes, scope)
+                    path, before = find_in_ast(example, tree, scope)
                     self.assertIsInstance(path, list)
                     self.assertIsInstance(before, bool)

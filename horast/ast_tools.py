@@ -144,9 +144,14 @@ def find_in_ast(code: str, tree: typed_ast.ast3.AST, scope: Scope,
     Where:
     - path is path to the anchor node for the target scope
     - before is boolean flag set to True if target scope is before the anchor node, False otherwise
+
+    Last 2 argument "nodes" and "scopes" are optional but when calling this function many times
+    for the same AST providing them is encouraged as constructing those lists is time consuming.
     """
-    scopes = get_ast_node_scopes(code, nodes)
-    assert len(nodes) == len(scopes), (len(nodes), len(scopes))
+    if nodes is None:
+        nodes = ast_to_list(tree)
+    if scopes is None:
+        scopes = get_ast_node_scopes(code, nodes)
     node_scopes_by_start = list(zip(nodes, scopes))
     node_scopes_by_start.sort(key=lambda _: _[1].end, reverse=True)
     node_scopes_by_start.sort(key=lambda _: _[1].start)
