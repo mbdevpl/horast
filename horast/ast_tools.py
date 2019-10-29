@@ -28,12 +28,15 @@ Meaning of fields:
 
 
 def ast_to_list(
-        tree: typed_ast.ast3.AST, only_localizable: bool = False) -> t.List[typed_ast.ast3.AST]:
+        tree: typed_ast.ast3.AST, only_localizable: bool = False,
+        keep_type_ignore: bool = False) -> t.List[typed_ast.ast3.AST]:
     """Generate a flat list of nodes in AST."""
     nodes = []
 
     class Visitor(RecursiveAstVisitor[typed_ast.ast3]):
         def visit_node(self, node):
+            if not keep_type_ignore and isinstance(node, typed_ast.ast3.TypeIgnore):
+                return
             if not only_localizable or hasattr(node, 'lineno') and hasattr(node, 'col_offset'):
                 nodes.append(node)
     visitor = Visitor()
