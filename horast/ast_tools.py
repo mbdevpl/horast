@@ -6,6 +6,7 @@ import re
 import typing as t
 
 import asttokens
+import colorama
 from static_typing.ast_manipulation import RecursiveAstVisitor
 import typed_ast.ast3
 
@@ -62,11 +63,13 @@ def convert_1d_str_index_to_2d(
     col_offset = index
     if newline_starts and lineno > 1:
         col_offset -= newline_starts[lineno - 2]
-    _LOG.debug('converted %s[%i] into (%i, %i)', repr(text), index, lineno, col_offset)
+    _LOG.log(logging.NOTSET, 'converted %s[%i] into (%i, %i)',
+             repr(text), index, lineno, col_offset)
     return lineno, col_offset
 
 
 def get_ast_node_scopes(code: str, nodes: t.List[typed_ast.ast3.AST]) -> t.List[Scope]:
+    """Get locations in source code for each given AST node."""
     atok = asttokens.ASTTokens(code, tree=ast.parse(code))
     ast_nodes = ast_to_list(atok.tree)
     assert len(ast_nodes) == len(nodes), (len(ast_nodes), len(nodes))
@@ -77,12 +80,13 @@ def get_ast_node_scopes(code: str, nodes: t.List[typed_ast.ast3.AST]) -> t.List[
     for node in ast_nodes:
         raw_node_scope = atok.get_text_range(node)
         _LOG.debug(
-            'node %s at %s: code="""%s""", tree=%s',
-            type(node).__name__, raw_node_scope, atok.get_text(node), ast.dump(node))
+            'node %s at %s: code="""%s%s%s""", tree=%s%s%s',
+            type(node).__name__, raw_node_scope, colorama.Style.DIM, atok.get_text(node),
+            colorama.Style.RESET_ALL, colorama.Style.DIM, ast.dump(node), colorama.Style.RESET_ALL)
         node_scope = Scope(*[
             convert_1d_str_index_to_2d(code, _, newline_starts=newline_starts)
             for _ in raw_node_scope])
-        _LOG.debug('scope %s is %s', raw_node_scope, node_scope)
+        _LOG.log(logging.NOTSET, 'scope %s is %s', raw_node_scope, node_scope)
         scopes.append(node_scope)
     return scopes
 

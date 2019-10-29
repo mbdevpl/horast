@@ -46,7 +46,10 @@ class Comment(typed_ast.ast3.AST):
         if not hasattr(node, 'lineno'):
             raise ValueError('anchor node {} must have "lineno" attribute'
                              .format(typed_ast.ast3.dump(node, include_attributes=True)))
-        return node.lineno == token.start[0] and node.lineno == token.end[0]
+        eol = node.lineno == token.start[0] and node.lineno == token.end[0]
+        _LOG.debug('comment scope: %s, anchor scope: %s, evaluated EOL status: %s',
+                   (token.start[0], token.end[0]), (node.lineno,), eol)
+        return eol
 
     @classmethod
     def from_token(cls, token: tokenize.TokenInfo, path_to_anchor, before_anchor):
