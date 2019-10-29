@@ -28,6 +28,7 @@ class Tests(unittest.TestCase):
                 expected_count = max(1 if comments else 0, len(non_comment_nodes)) + len(comments)
                 self.assertEqual(len(nodes), expected_count, (nodes, non_comment_nodes, comments))
 
+    @unittest.skip
     def test_comment_tokens_approx(self):
         for (name, example), only_localizable in itertools.product(EXAMPLES.items(), (False, True)):
             # for only_localizable in:
