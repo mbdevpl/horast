@@ -90,6 +90,7 @@ def insert_comment_tokens(
 
 def insert_comment_tokens_approx(
         tree: typed_ast.ast3.AST, tokens: t.List[tokenize.TokenInfo]) -> typed_ast.ast3.AST:
+    """Deprecated, use insert_comment_tokens instead."""
     warnings.warn('function insert_comment_tokens_approx is outdated and faulty, and it will be'
                   ' removed from horast, use insert_comment_tokens instead', DeprecationWarning)
     assert isinstance(tree, typed_ast.ast3.AST)

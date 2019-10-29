@@ -101,9 +101,12 @@ def node_path_in_ast(
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(target_node, typed_ast.ast3.AST), type(target_node)
     _LOG.debug('looking for node: %s', typed_ast.ast3.dump(target_node, include_attributes=True))
-    nodes = ast_to_list(tree)
-    nodes = nodes[:nodes.index(target_node) + 1]
+    if nodes is None:
+        nodes = ast_to_list(tree)
+    assert target_node in nodes
     node_path = [AstPathNode(target_node, None, None)]
+    target_node_index = nodes.index(target_node)
+    nodes = nodes[:target_node_index + 1]
     current_anchor = target_node
     reversed_anchor_index = 0
     reversed_nodes = list(reversed(list(enumerate(nodes))))
@@ -201,7 +204,8 @@ def find_in_ast(code: str, tree: typed_ast.ast3.AST, scope: Scope,
             type(nodes[0])
         assert len(nodes[0].body) > 0
         return ([AstPathNode(nodes[0], 'body', len(nodes[0].body) - 1)], False)
-    elif node_by_start_before_index is None or not scopes_containing_target_scope:
+
+    if node_by_start_before_index is None or not scopes_containing_target_scope:
         raise NotImplementedError(
             'inconsistent results for target {} in:\n"""\n{}\nafter {}, before {}, within {}"""'
             .format(target_scope, code, node_by_end_after_index, node_by_start_before_index,
@@ -231,7 +235,7 @@ def insert_at_path_in_tree(
     assert isinstance(tree, typed_ast.ast3.AST), type(tree)
     assert isinstance(inserted, typed_ast.ast3.AST), type(inserted)
     # assert isinstance(anchor, typed_ast.ast3.AST), type(anchor)
-    parent, field, index = path_to_anchor[-1]
+    parent, field, index = path_to_anchor[-1][:3]
     if not before_anchor:
         index += 1
     getattr(parent, field).insert(index, inserted)
@@ -241,7 +245,9 @@ def insert_at_path_in_tree(
 def insert_in_tree(
         tree: typed_ast.ast3.AST, inserted: typed_ast.ast3.AST, anchor: typed_ast.ast3.AST,
         before_anchor: bool = False, strict: bool = False) -> typed_ast.ast3.AST:
-    """Insert a new AST node into an existing AST near the anchor node.
+    """Deprecated, use insert_at_path_in_tree instead.
+
+    Insert a new AST node into an existing AST near the anchor node.
 
     Try to maintain correctness after insertion.
     """

@@ -8,6 +8,8 @@ import typing as t
 
 import typed_ast.ast3
 
+from .token_tools import get_token_scope
+
 _LOG = logging.getLogger(__name__)
 
 
