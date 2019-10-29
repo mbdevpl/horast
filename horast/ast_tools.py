@@ -136,9 +136,9 @@ def node_path_in_ast(
     return list(reversed(node_path))
 
 
-def find_in_ast(
-        code: str, tree: typed_ast.ast3.AST, nodes: t.List[typed_ast.ast3.AST],
-        scope: Scope) -> t.Tuple[t.List[AstPathNode], bool]:
+def find_in_ast(code: str, tree: typed_ast.ast3.AST, scope: Scope,
+                *, nodes: t.List[typed_ast.ast3.AST] = None,
+                scopes=None) -> t.Tuple[t.List[AstPathNode], bool]:
     """Return tuple: (path, before).
 
     Where:
