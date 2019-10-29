@@ -108,8 +108,10 @@ class Tests(unittest.TestCase):
         self.assertEqual(code, unparsed)
 
     def test_roundtrip_type_comment(self):
-        code = """class foo:
-    def bar(self):  # whatever comment
+        code = """class foo():
+
+    def bar(self):
+        # whatever comment
         pass
     bar.__baz__ = None  # type: str"""
         tree = parse(code)
