@@ -29,7 +29,7 @@ def is_comment(token: tokenize.TokenInfo) -> bool:
 
 
 def is_type_comment(token: tokenize.TokenInfo) -> bool:
-    return token.string.startswith('# type:')
+    return token.string.startswith('# type:') and token.string != '# type: ignore'
 
 
 def is_comment_but_not_type_comment(token: tokenize.TokenInfo) -> bool:
