@@ -10,7 +10,7 @@ import colorama
 from static_typing.ast_manipulation import RecursiveAstVisitor
 import typed_ast.ast3
 
-from .token_tools import Scope
+from .token_tools import Location, Scope
 
 _LOG = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def convert_1d_str_index_to_2d(
         col_offset -= newline_starts[lineno - 2]
     _LOG.log(logging.NOTSET, 'converted %s[%i] into (%i, %i)',
              repr(text), index, lineno, col_offset)
-    return lineno, col_offset
+    return Location(lineno, col_offset)
 
 
 def get_ast_node_scopes(code: str, nodes: t.List[typed_ast.ast3.AST]) -> t.List[Scope]:
